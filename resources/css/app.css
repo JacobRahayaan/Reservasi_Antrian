@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+    /* Font */
+    --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+    /* Warna institusional (navy) */
+    --color-pln-navy-950: #0b2036;
+    --color-pln-navy-900: #0f2b45;
+    --color-pln-navy-800: #15395a;
+    --color-pln-navy-700: #1c4a73;
+    --color-pln-navy-600: #285f8f;
+
+    /* Warna aksen energi (amber) */
+    --color-pln-amber-600: #db8f1f;
+    --color-pln-amber-500: #f2a93c;
+    --color-pln-amber-400: #f6bd63;
+
+    /* Warna netral */
+    --color-pln-slate-50: #f6f7f9;
+    --color-pln-slate-100: #eef1f4;
+    --color-pln-slate-200: #e2e6eb;
+    --color-pln-slate-300: #cbd2d9;
+    --color-pln-slate-400: #94a0ad;
+    --color-pln-slate-600: #56636f;
+    --color-pln-slate-900: #1b2733;
+
+    /* Warna status reservasi */
+    --color-status-review: #2563a8;
+    --color-status-visit: #c2740a;
+    --color-status-online: #0e8f7a;
+    --color-status-done: #1f8b3f;
+    --color-status-cancel: #b23b3b;
+}
+
+@layer base {
+    html {
+        @apply scroll-smooth;
+    }
+
+    body {
+        @apply bg-pln-slate-50 font-sans text-pln-slate-900 antialiased;
+    }
+
+    :focus-visible {
+        @apply outline outline-2 outline-offset-2 outline-pln-amber-500;
+    }
+}
