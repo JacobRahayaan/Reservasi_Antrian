@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-40 border-b border-pln-slate-200 bg-white">
+<header class="sticky top-0 z-40 border-b border-pln-slate-200 bg-white print:hidden">
     <nav class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Navigasi utama">
 
         <a href="{{ route('landing') }}" class="flex items-center gap-2.5">

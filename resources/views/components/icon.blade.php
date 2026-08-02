@@ -21,6 +21,7 @@
         'facebook' => '<path stroke-linecap="round" stroke-linejoin="round" d="M14 20v-6h2.2l.3-2.6H14V9.7c0-.75.2-1.26 1.28-1.26H16.6V6.1A16 16 0 0 0 14.9 6c-1.9 0-3.2 1.16-3.2 3.3v1.9H9.5v2.6h2.2V20" /><rect x="3.5" y="3.5" width="17" height="17" rx="4" />',
         'instagram' => '<rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="16.6" cy="7.4" r="0.6" />',
         'twitter' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 6.4c-.66.3-1.36.5-2.1.6a3.6 3.6 0 0 0 1.6-2 7.2 7.2 0 0 1-2.3.9 3.6 3.6 0 0 0-6.2 3.3A10.2 10.2 0 0 1 4.6 5.4a3.6 3.6 0 0 0 1.1 4.8c-.58-.02-1.13-.18-1.6-.44v.05a3.6 3.6 0 0 0 2.9 3.5c-.5.14-1.06.16-1.6.06a3.6 3.6 0 0 0 3.4 2.5A7.2 7.2 0 0 1 3 17.4a10.2 10.2 0 0 0 5.5 1.6c6.6 0 10.2-5.5 10.2-10.2v-.47A7.3 7.3 0 0 0 21 6.4Z" />',
+		'user' => '<circle cx="12" cy="8" r="4" /><path stroke-linecap="round" stroke-linejoin="round" d="M4 20c0-4 4-6 8-6s8 2 8 6" />',
         'youtube' => '<rect x="2.5" y="6" width="19" height="12" rx="4" /><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 9.5v5l4.5-2.5-4.5-2.5Z" />',
     ];
 

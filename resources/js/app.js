@@ -205,3 +205,38 @@ if (layananOptions.length && tanggalInput && jadwalSelect) {
         muatJadwalTersedia();
     }
 }
+
+/**
+ * Collapse/expand konten pada mobile (halaman Detail Reservasi).
+ * Elemen [data-toggle-target="id"] mengatur visibilitas #id dan
+ * memutar ikon panah [data-toggle-icon] di dalam tombol.
+ */
+document.querySelectorAll('[data-toggle-target]').forEach((button) => {
+    const target = document.getElementById(button.dataset.toggleTarget);
+    const icon = button.querySelector('[data-toggle-icon]');
+
+    if (!target) {
+        return;
+    }
+
+    button.addEventListener('click', () => {
+        const isHidden = target.classList.toggle('hidden');
+        button.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+        icon?.classList.toggle('rotate-180', isHidden);
+    });
+});
+
+/**
+ * "Lihat Semua" dokumen (halaman Detail Reservasi).
+ * Menampilkan seluruh dokumen yang tersembunyi (>3 item) dan
+ * menyembunyikan kembali tombolnya setelah diklik.
+ */
+document.querySelectorAll('[data-dokumen-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+        const card = button.closest('div');
+        const hiddenItems = card?.parentElement?.querySelectorAll('.hidden') ?? [];
+
+        hiddenItems.forEach((item) => item.classList.remove('hidden'));
+        button.remove();
+    });
+});
