@@ -1,63 +1,74 @@
 @extends('layouts.public')
 
 @section('title', 'Beranda')
+@section('meta_description', 'Reservasi layanan pelanggan PLN secara online. Pilih layanan, tanggal, dan jam kedatangan, lalu dapatkan nomor antrean tanpa perlu mengantre di kantor.')
 
 @section('content')
 
-    <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-        <div class="grid items-center gap-12 lg:grid-cols-2">
+    <x-landing.hero />
 
-            <div>
-                <span class="inline-flex items-center gap-2 rounded-full bg-pln-navy-900/5 px-3 py-1 text-xs font-medium text-pln-navy-800">
-                    <span class="h-1.5 w-1.5 rounded-full bg-pln-amber-500"></span>
-                    Sprint 0 &middot; Fondasi Proyek
-                </span>
-
-                <h1 class="mt-5 font-display text-4xl font-semibold tracking-tight text-pln-navy-900 sm:text-5xl">
-                    Reservasi layanan PLN, tanpa antre di tempat.
-                </h1>
-
-                <p class="mt-5 max-w-xl text-base leading-relaxed text-pln-slate-600 sm:text-lg">
-                    Jadwalkan kedatangan Anda, sampaikan keluhan lebih awal, dan dapatkan nomor antrean secara instan. Petugas kami mereview kebutuhan Anda sebelum Anda datang.
+    <section id="cara-reservasi" class="bg-pln-slate-50 py-16 sm:py-20">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-xl text-center">
+                <h2 class="font-display text-2xl font-bold tracking-tight text-pln-navy-950 sm:text-3xl">
+                    Cara Reservasi
+                </h2>
+                <p class="mt-3 text-base text-pln-slate-600">
+                    Ikuti langkah mudah berikut untuk mendapatkan nomor antrean Anda.
                 </p>
-
-                <div class="mt-8 flex flex-wrap gap-3">
-                    <x-button href="#" variant="primary" size="lg">
-                        Buat Reservasi
-                    </x-button>
-                    <x-button href="#" variant="ghost" size="lg">
-                        Cek Status Reservasi
-                    </x-button>
-                </div>
             </div>
 
-            <x-card class="p-8">
-                <x-slot:header>
-                    <div>
-                        <p class="text-xs font-medium uppercase tracking-wider text-pln-slate-400">Nomor Antrean</p>
-                        <p class="font-mono text-3xl font-semibold text-pln-navy-900">A-012</p>
-                    </div>
-                    <x-badge variant="review">Menunggu Review</x-badge>
-                </x-slot:header>
+            <ol class="mt-12 sm:grid sm:grid-cols-3 sm:gap-8">
+                @foreach ($steps as $step)
+                    <x-landing.step-card
+                        :number="$step['number']"
+                        :icon="$step['icon']"
+                        :title="$step['title']"
+                        :description="$step['description']"
+                        :last="$loop->last"
+                    />
+                @endforeach
+            </ol>
+        </div>
+    </section>
 
-                <dl class="space-y-3 text-sm">
-                    <div class="flex justify-between">
-                        <dt class="text-pln-slate-500">Jenis Layanan</dt>
-                        <dd class="font-medium text-pln-slate-900">Tambah Daya</dd>
-                    </div>
-                    <div class="flex justify-between">
-                        <dt class="text-pln-slate-500">Jadwal</dt>
-                        <dd class="font-medium text-pln-slate-900">12 Agustus 2026, 09.00</dd>
-                    </div>
-                </dl>
+    <section id="layanan" class="bg-white py-16 sm:py-20">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-xl text-center">
+                <h2 class="font-display text-2xl font-bold tracking-tight text-pln-navy-950 sm:text-3xl">
+                    Jenis Layanan
+                </h2>
+                <p class="mt-3 text-base text-pln-slate-600">
+                    Pilih layanan sesuai kebutuhan Anda.
+                </p>
+            </div>
 
-                <x-slot:footer>
-                    <p class="text-xs text-pln-slate-400">
-                        Contoh tampilan kartu — akan menjadi Halaman Detail Reservasi pada sprint berikutnya.
-                    </p>
-                </x-slot:footer>
-            </x-card>
+            <div class="mt-12 hidden sm:grid sm:grid-cols-3 sm:gap-6">
+                @foreach ($services as $service)
+                    <x-landing.service-card
+                        :variant="$service['variant']"
+                        :icon="$service['icon']"
+                        :title="$service['title']"
+                        :description="$service['description']"
+                        :href="$service['href']"
+                    />
+                @endforeach
+            </div>
 
+            <div class="mt-12 space-y-3 sm:hidden">
+                @foreach ($services as $service)
+                    <x-landing.service-row
+                        :variant="$service['variant']"
+                        :icon="$service['icon']"
+                        :title="$service['title']"
+                        :href="$service['href']"
+                    />
+                @endforeach
+            </div>
+
+            <div class="mt-10">
+                <x-landing.help-banner />
+            </div>
         </div>
     </section>
 
