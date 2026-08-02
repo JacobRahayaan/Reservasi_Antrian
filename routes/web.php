@@ -20,6 +20,8 @@ Route::prefix('reservasi')->name('reservasi.')->group(function () {
     Route::get('/jadwal-tersedia', [ReservasiController::class, 'jadwalTersedia'])->name('jadwal-tersedia');
     Route::post('/', [ReservasiController::class, 'store'])->name('store');
     Route::get('/{reservasi}', [ReservasiController::class, 'show'])->name('show');
+    Route::get('/{reservasi}/dokumen/{dokumen}/download', [ReservasiController::class, 'downloadDokumen'])
+        ->name('dokumen.download');
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {

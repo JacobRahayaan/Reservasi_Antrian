@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreReservasiRequest;
+use App\Models\DokumenReservasi;
 use App\Models\Jadwal;
 use App\Models\Layanan;
 use App\Models\Reservasi;
@@ -10,7 +11,9 @@ use App\Services\ReservasiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReservasiController extends Controller
 {
@@ -75,12 +78,41 @@ class ReservasiController extends Controller
     }
 
     /**
-     * Tampilkan halaman detail reservasi.
+     * Tampilkan halaman detail reservasi (read-only).
+     *
+     * Query dioptimalkan: setiap relasi hanya memuat kolom yang benar-benar
+     * ditampilkan di view, riwayat status diurutkan kronologis (lama ke baru)
+     * untuk keperluan timeline, dan catatan Customer Service dibatasi hanya
+     * yang terbaru sesuai kebutuhan tampilan.
      */
     public function show(Reservasi $reservasi): View
     {
-        $reservasi->load(['layanan', 'jadwal', 'dokumen', 'statusHistories', 'notes']);
+        $reservasi->load([
+            'layanan:id,nama_layanan,kode_layanan',
+            'jadwal:id,tanggal,jam_mulai,jam_selesai',
+            'dokumen:id,reservasi_id,nama_file_asli,ukuran_file,created_at',
+            'statusHistories' => fn ($query) => $query->oldest('changed_at'),
+            'notes' => fn ($query) => $query->latest()->limit(1),
+        ]);
 
         return view('pages.reservasi.show', compact('reservasi'));
+    }
+
+    /**
+     * Unduh dokumen pendukung milik sebuah reservasi.
+     *
+     * Kepemilikan dokumen divalidasi manual terhadap reservasi pada URL
+     * (bukan hanya mengandalkan route model binding) untuk mencegah
+     * pelanggan mengakses dokumen milik reservasi lain lewat tebak ID.
+     */
+    public function downloadDokumen(Reservasi $reservasi, DokumenReservasi $dokumen): StreamedResponse
+    {
+        abort_unless($dokumen->reservasi_id === $reservasi->id, 404);
+        abort_unless(Storage::disk('local')->exists($dokumen->path_file), 404);
+
+        return Storage::disk('local')->download(
+            $dokumen->path_file,
+            $dokumen->nama_file_asli
+        );
     }
 }

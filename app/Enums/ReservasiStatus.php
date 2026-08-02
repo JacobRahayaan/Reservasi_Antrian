@@ -31,4 +31,20 @@ enum ReservasiStatus: string
             self::Dibatalkan => 'cancel',
         };
     }
+
+    /**
+     * Deskripsi singkat tahap status, dipakai sebagai teks default pada
+     * timeline riwayat status ketika belum ada catatan khusus untuk tahap
+     * tersebut (mis. tahap yang belum tercapai).
+     */
+    public function hint(): string
+    {
+        return match ($this) {
+            self::MenungguReview => 'Reservasi Anda sedang di-review oleh Customer Service.',
+            self::PerluDatang => 'Akan diinformasikan jika perlu datang ke kantor PLN.',
+            self::SelesaiOnline => 'Jika keluhan dapat diselesaikan secara online.',
+            self::Selesai => 'Reservasi telah selesai.',
+            self::Dibatalkan => 'Reservasi dibatalkan.',
+        };
+    }
 }
