@@ -1,61 +1,188 @@
 @php
     $isAdmin = request()->routeIs('admin.*');
     $isCs = request()->routeIs('cs.*');
-
-    $linkClass = fn (bool $active) => $active
-        ? 'flex items-center gap-3 rounded-r-lg border-l-2 border-pln-amber-500 bg-pln-navy-800 px-3 py-2 text-sm font-medium text-white'
-        : 'flex items-center gap-3 rounded-r-lg border-l-2 border-transparent px-3 py-2 text-sm font-medium text-pln-slate-300 transition hover:bg-pln-navy-800 hover:text-white';
 @endphp
 
 <aside
     id="dashboard-sidebar"
-    class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-pln-navy-900 transition-transform duration-200 lg:translate-x-0"
+    class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col overflow-y-auto border-r border-pln-slate-200 bg-white transition-transform duration-200 lg:translate-x-0"
 >
-    <div class="flex h-16 items-center gap-2.5 px-5">
-        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-pln-navy-950">
-            <svg viewBox="0 0 24 24" class="h-5 w-5 text-pln-amber-500" fill="currentColor" aria-hidden="true">
-                <path d="M13 2 3 14h7l-1 8 11-14h-8l1-6Z" />
-            </svg>
-        </span>
-        <span class="font-display text-base font-semibold tracking-tight text-white">
-            SIRA<span class="text-pln-amber-500">-PLN</span>
-        </span>
-    </div>
+	<div class="flex h-16 items-center gap-3 px-5">
 
-    <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-6" aria-label="Navigasi dashboard">
+		<img
+			src="{{ asset('images/logo-pln.png') }}"
+			alt="Logo PLN"
+			class="h-10 w-10 object-contain"
+		>
+
+		<div>
+			<p class="text-xs text-pln-slate-500">
+				Sistem Reservasi Antrian ULP Manado Selatan
+			</p>
+		</div>
+
+	</div>
+
+    <nav class="flex-1 space-y-6 px-3 py-4" aria-label="Navigasi dashboard">
 
         @if ($isAdmin)
-            <div>
-                <p class="px-3 text-xs font-semibold uppercase tracking-wider text-pln-slate-400">Admin</p>
-                <div class="mt-2 space-y-1">
-                    <a href="{{ route('admin.dashboard') }}" class="{{ $linkClass(request()->routeIs('admin.dashboard')) }}">
-                        <span>Ringkasan</span>
-                    </a>
-                </div>
-            </div>
+
+            <x-dashboard.nav-group title="Menu Utama">
+
+                <x-dashboard.nav-item
+                    :href="route('admin.dashboard')"
+                    icon="check-circle"
+                    :active="request()->routeIs('admin.dashboard')"
+                >
+                    Dashboard
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('admin.reservasi.index') ? route('admin.reservasi.index') : null"
+                    icon="clipboard-list"
+                    :disabled="! Route::has('admin.reservasi.index')"
+                >
+                    Reservasi
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('admin.kalender.index') ? route('admin.kalender.index') : null"
+                    icon="calendar"
+                    :disabled="! Route::has('admin.kalender.index')"
+                >
+                    Kalender Jadwal
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('admin.laporan.index') ? route('admin.laporan.index') : null"
+                    icon="chart-bar"
+                    :disabled="! Route::has('admin.laporan.index')"
+                >
+                    Laporan
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('admin.pengguna.index') ? route('admin.pengguna.index') : null"
+                    icon="users"
+                    :disabled="! Route::has('admin.pengguna.index')"
+                >
+                    Pengguna
+                </x-dashboard.nav-item>
+
+            </x-dashboard.nav-group>
+
+            <x-dashboard.nav-group title="Pengelolaan">
+
+                <x-dashboard.nav-item
+                    :href="route('admin.layanan.index')"
+                    icon="bolt"
+                    :active="request()->routeIs('admin.layanan.*')"
+                >
+                    Layanan
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('admin.jadwal.index') ? route('admin.jadwal.index') : null"
+                    icon="ticket"
+                    :disabled="! Route::has('admin.jadwal.index')"
+                >
+                    Jadwal &amp; Kuota
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('admin.pengumuman.index') ? route('admin.pengumuman.index') : null"
+                    icon="megaphone"
+                    :disabled="! Route::has('admin.pengumuman.index')"
+                >
+                    Pengumuman
+                </x-dashboard.nav-item>
+
+            </x-dashboard.nav-group>
+
+            <x-dashboard.nav-group title="Pengaturan">
+
+                <x-dashboard.nav-item
+                    :href="Route::has('admin.pengaturan.index') ? route('admin.pengaturan.index') : null"
+                    icon="cog"
+                    :disabled="! Route::has('admin.pengaturan.index')"
+                >
+                    Pengaturan Sistem
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('admin.profil.index') ? route('admin.profil.index') : null"
+                    icon="user"
+                    :disabled="! Route::has('admin.profil.index')"
+                >
+                    Profil Saya
+                </x-dashboard.nav-item>
+
+            </x-dashboard.nav-group>
+
         @elseif ($isCs)
-            <div>
-                <p class="px-3 text-xs font-semibold uppercase tracking-wider text-pln-slate-400">Customer Service</p>
-                <div class="mt-2 space-y-1">
-                    <a href="{{ route('cs.dashboard') }}" class="{{ $linkClass(request()->routeIs('cs.dashboard')) }}">
-                        <span>Ringkasan</span>
-                    </a>
-                </div>
-            </div>
+
+            <x-dashboard.nav-group title="Menu Utama">
+
+                <x-dashboard.nav-item
+                    :href="route('cs.dashboard')"
+                    icon="check-circle"
+                    :active="request()->routeIs('cs.dashboard')"
+                >
+                    Dashboard
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index') : null"
+                    icon="clipboard-list"
+                    :disabled="! Route::has('cs.reservasi.index')"
+                >
+                    Daftar Reservasi
+                </x-dashboard.nav-item>
+
+            </x-dashboard.nav-group>
+
         @else
-            <div>
-                <p class="px-3 text-xs font-semibold uppercase tracking-wider text-pln-slate-400">Sistem</p>
-                <div class="mt-2 space-y-1">
-                    <a href="{{ route('system.error-demo') }}" class="{{ $linkClass(request()->routeIs('system.error-demo')) }}">
-                        <span>Contoh Halaman Error</span>
-                    </a>
-                </div>
-            </div>
+
+            <x-dashboard.nav-group title="Sistem">
+
+                <x-dashboard.nav-item
+                    :href="route('system.error-demo')"
+                    icon="x-mark"
+                    :active="request()->routeIs('system.error-demo')"
+                >
+                    Contoh Halaman Error
+                </x-dashboard.nav-item>
+
+            </x-dashboard.nav-group>
+
         @endif
 
     </nav>
 
-    <div class="border-t border-pln-navy-800 px-4 py-4">
-        <p class="text-xs text-pln-slate-400">SIRA-PLN &middot; MVP 1.0</p>
+    <div class="border-t border-pln-slate-200 p-4">
+        <div class="rounded-xl bg-pln-navy-900/5 p-4">
+
+            <p class="text-sm font-semibold text-pln-navy-900">
+                Butuh Bantuan?
+            </p>
+
+            <p class="mt-1 text-xs leading-relaxed text-pln-slate-500">
+                Hubungi Contact Center PLN 123.
+            </p>
+
+            <a
+                href="tel:123"
+                class="mt-3 flex items-center justify-center gap-2 rounded-lg bg-pln-navy-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-pln-navy-800"
+            >
+                <x-icon
+                    name="phone"
+                    class="h-3.5 w-3.5"
+                />
+
+                PLN 123
+            </a>
+
+        </div>
     </div>
+
 </aside>
