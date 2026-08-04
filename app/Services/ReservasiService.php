@@ -18,9 +18,10 @@ use Illuminate\Validation\ValidationException;
 class ReservasiService
 {
     /**
-     * Buat reservasi baru beserta seluruh proses turunannya: validasi kuota,
-     * generate kode reservasi, generate nomor antrean, simpan riwayat status
-     * awal, simpan catatan awal, dan simpan dokumen pendukung.
+     * Buat reservasi baru beserta seluruh proses turunannya: validasi kuota
+     * dan status aktif jadwal, generate kode reservasi, generate nomor
+     * antrean, simpan riwayat status awal, simpan catatan awal, dan simpan
+     * dokumen pendukung.
      *
      * @param  array<string, mixed>  $data
      * @param  array<int, UploadedFile>  $dokumen
@@ -34,6 +35,12 @@ class ReservasiService
                 ->where('id', $data['jadwal_id'])
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if (! $jadwal->is_active) {
+                throw ValidationException::withMessages([
+                    'jadwal_id' => 'Jadwal yang dipilih sudah tidak tersedia, silakan pilih jadwal lain.',
+                ]);
+            }
 
             if ($jadwal->kuota_terpakai >= $jadwal->kuota_maksimal) {
                 throw ValidationException::withMessages([

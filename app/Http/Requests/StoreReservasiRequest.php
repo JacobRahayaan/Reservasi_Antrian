@@ -81,6 +81,10 @@ class StoreReservasiRequest extends FormRequest
                 $validator->errors()->add('jadwal_id', 'Jadwal tidak sesuai dengan tanggal yang dipilih.');
             }
 
+            if (! $jadwal->is_active) {
+                $validator->errors()->add('jadwal_id', 'Jadwal yang dipilih sudah tidak tersedia, silakan pilih jadwal lain.');
+            }
+
             if ($jadwal->kuota_terpakai >= $jadwal->kuota_maksimal) {
                 $validator->errors()->add('jadwal_id', 'Slot waktu yang dipilih sudah penuh, silakan pilih jadwal lain.');
             }

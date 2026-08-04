@@ -36,6 +36,10 @@ class ReservasiController extends Controller
 
     /**
      * Ambil daftar jam tersedia untuk kombinasi layanan + tanggal (AJAX).
+     *
+     * Hanya mengembalikan jadwal yang AKTIF dan masih memiliki sisa kuota
+     * (App\Models\Jadwal::scopeTersediaUntukPelanggan), sesuai integrasi
+     * modul Kelola Jadwal & Kuota Sprint 9.
      */
     public function jadwalTersedia(Request $request): JsonResponse
     {
@@ -45,9 +49,9 @@ class ReservasiController extends Controller
         ]);
 
         $jadwals = Jadwal::query()
+            ->tersediaUntukPelanggan()
             ->where('layanan_id', $validated['layanan_id'])
             ->whereDate('tanggal', $validated['tanggal'])
-            ->whereColumn('kuota_terpakai', '<', 'kuota_maksimal')
             ->orderBy('jam_mulai')
             ->get(['id', 'jam_mulai', 'jam_selesai', 'kuota_maksimal', 'kuota_terpakai']);
 
@@ -79,11 +83,6 @@ class ReservasiController extends Controller
 
     /**
      * Tampilkan halaman detail reservasi (read-only).
-     *
-     * Query dioptimalkan: setiap relasi hanya memuat kolom yang benar-benar
-     * ditampilkan di view, riwayat status diurutkan kronologis (lama ke baru)
-     * untuk keperluan timeline, dan catatan Customer Service dibatasi hanya
-     * yang terbaru sesuai kebutuhan tampilan.
      */
     public function show(Reservasi $reservasi): View
     {
@@ -100,10 +99,6 @@ class ReservasiController extends Controller
 
     /**
      * Unduh dokumen pendukung milik sebuah reservasi.
-     *
-     * Kepemilikan dokumen divalidasi manual terhadap reservasi pada URL
-     * (bukan hanya mengandalkan route model binding) untuk mencegah
-     * pelanggan mengakses dokumen milik reservasi lain lewat tebak ID.
      */
     public function downloadDokumen(Reservasi $reservasi, DokumenReservasi $dokumen): StreamedResponse
     {
