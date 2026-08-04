@@ -22,13 +22,10 @@
 		</div>
 
 	</div>
-
     <nav class="flex-1 space-y-6 px-3 py-4" aria-label="Navigasi dashboard">
 
         @if ($isAdmin)
-
             <x-dashboard.nav-group title="Menu Utama">
-
                 <x-dashboard.nav-item
                     :href="route('admin.dashboard')"
                     icon="check-circle"
@@ -68,11 +65,9 @@
                 >
                     Pengguna
                 </x-dashboard.nav-item>
-
             </x-dashboard.nav-group>
 
             <x-dashboard.nav-group title="Pengelolaan">
-
                 <x-dashboard.nav-item
                     :href="route('admin.layanan.index')"
                     icon="bolt"
@@ -82,9 +77,9 @@
                 </x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
-                    :href="Route::has('admin.jadwal.index') ? route('admin.jadwal.index') : null"
+                    :href="route('admin.jadwal.index')"
                     icon="ticket"
-                    :disabled="! Route::has('admin.jadwal.index')"
+                    :active="request()->routeIs('admin.jadwal.*')"
                 >
                     Jadwal &amp; Kuota
                 </x-dashboard.nav-item>
@@ -96,11 +91,9 @@
                 >
                     Pengumuman
                 </x-dashboard.nav-item>
-
             </x-dashboard.nav-group>
 
             <x-dashboard.nav-group title="Pengaturan">
-
                 <x-dashboard.nav-item
                     :href="Route::has('admin.pengaturan.index') ? route('admin.pengaturan.index') : null"
                     icon="cog"
@@ -116,13 +109,9 @@
                 >
                     Profil Saya
                 </x-dashboard.nav-item>
-
             </x-dashboard.nav-group>
-
         @elseif ($isCs)
-
             <x-dashboard.nav-group title="Menu Utama">
-
                 <x-dashboard.nav-item
                     :href="route('cs.dashboard')"
                     icon="check-circle"
@@ -138,13 +127,9 @@
                 >
                     Daftar Reservasi
                 </x-dashboard.nav-item>
-
             </x-dashboard.nav-group>
-
         @else
-
             <x-dashboard.nav-group title="Sistem">
-
                 <x-dashboard.nav-item
                     :href="route('system.error-demo')"
                     icon="x-mark"
@@ -152,37 +137,24 @@
                 >
                     Contoh Halaman Error
                 </x-dashboard.nav-item>
-
             </x-dashboard.nav-group>
-
         @endif
 
     </nav>
 
     <div class="border-t border-pln-slate-200 p-4">
         <div class="rounded-xl bg-pln-navy-900/5 p-4">
-
-            <p class="text-sm font-semibold text-pln-navy-900">
-                Butuh Bantuan?
-            </p>
-
+            <p class="text-sm font-semibold text-pln-navy-900">Butuh Bantuan?</p>
             <p class="mt-1 text-xs leading-relaxed text-pln-slate-500">
                 Hubungi Contact Center PLN 123.
             </p>
-
-            <a
+            
                 href="tel:123"
                 class="mt-3 flex items-center justify-center gap-2 rounded-lg bg-pln-navy-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-pln-navy-800"
             >
-                <x-icon
-                    name="phone"
-                    class="h-3.5 w-3.5"
-                />
-
+                <x-icon name="phone" class="h-3.5 w-3.5" />
                 PLN 123
             </a>
-
         </div>
     </div>
-
 </aside>
