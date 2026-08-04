@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboardController;
 use App\Http\Controllers\LandingController;
@@ -31,6 +32,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('layanan', LayananController::class);
     Route::patch('layanan/{layanan}/toggle-status', [LayananController::class, 'toggleStatus'])
         ->name('layanan.toggle-status');
+
+    Route::get('jadwal/export', [JadwalController::class, 'export'])->name('jadwal.export');
+    Route::resource('jadwal', JadwalController::class);
+    Route::patch('jadwal/{jadwal}/toggle-status', [JadwalController::class, 'toggleStatus'])
+        ->name('jadwal.toggle-status');
 });
 
 Route::prefix('cs')->name('cs.')->group(function () {
