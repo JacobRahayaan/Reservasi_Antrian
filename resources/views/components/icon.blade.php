@@ -44,6 +44,8 @@
         'chart-pie' => '<path stroke-linecap="round" stroke-linejoin="round" d="M11 3.5A8.5 8.5 0 1 0 20.5 13H11V3.5Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M14.5 3.6A8.5 8.5 0 0 1 20.4 9.5H14.5V3.6Z" />',
         'arrows-up-down' => '<path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16m0 0-3-3m3 3 3-3M17 20V4m0 0 3 3m-3-3-3 3" />',
         'exclamation-triangle' => '<path stroke-linecap="round" stroke-linejoin="round" d="M10.3 4 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4a2 2 0 0 0-3.4 0Z" /><path stroke-linecap="round" d="M12 9v4M12 17h.01" />',
+        'download' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />',
+        'dots-vertical' => '<circle cx="12" cy="6" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="12" cy="18" r="1.2" />',
     ];
 
     $path = $icons[$name] ?? '';
