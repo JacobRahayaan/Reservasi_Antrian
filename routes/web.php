@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ReservasiController;
@@ -26,6 +27,10 @@ Route::prefix('reservasi')->name('reservasi.')->group(function () {
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('layanan', LayananController::class);
+    Route::patch('layanan/{layanan}/toggle-status', [LayananController::class, 'toggleStatus'])
+        ->name('layanan.toggle-status');
 });
 
 Route::prefix('cs')->name('cs.')->group(function () {
