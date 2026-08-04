@@ -1,6 +1,14 @@
 @php
     $isAdmin = request()->routeIs('admin.*');
     $isCs = request()->routeIs('cs.*');
+
+    if ($isCs) {
+        $badgeStatusCs = \App\Models\Reservasi::query()
+            ->whereHas('jadwal', fn ($q) => $q->whereDate('tanggal', today()))
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+    }
 @endphp
 
 <aside
@@ -22,6 +30,7 @@
 		</div>
 
 	</div>
+
     <nav class="flex-1 space-y-6 px-3 py-4" aria-label="Navigasi dashboard">
 
         @if ($isAdmin)
@@ -69,17 +78,19 @@
 
             <x-dashboard.nav-group title="Pengelolaan">
                 <x-dashboard.nav-item
-                    :href="route('admin.layanan.index')"
+                    :href="Route::has('admin.layanan.index') ? route('admin.layanan.index') : null"
                     icon="bolt"
                     :active="request()->routeIs('admin.layanan.*')"
+                    :disabled="! Route::has('admin.layanan.index')"
                 >
                     Layanan
                 </x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
-                    :href="route('admin.jadwal.index')"
+                    :href="Route::has('admin.jadwal.index') ? route('admin.jadwal.index') : null"
                     icon="ticket"
                     :active="request()->routeIs('admin.jadwal.*')"
+                    :disabled="! Route::has('admin.jadwal.index')"
                 >
                     Jadwal &amp; Kuota
                 </x-dashboard.nav-item>
@@ -119,13 +130,97 @@
                 >
                     Dashboard
                 </x-dashboard.nav-item>
+            </x-dashboard.nav-group>
 
+            <x-dashboard.nav-group title="Reservasi">
+                {{-- @assumsi: nama route berikut dibangun pada sprint reservasi CS berikutnya --}}
                 <x-dashboard.nav-item
                     :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index') : null"
                     icon="clipboard-list"
                     :disabled="! Route::has('cs.reservasi.index')"
                 >
                     Daftar Reservasi
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index', ['status' => 'menunggu_review']) : null"
+                    icon="clock"
+                    :disabled="! Route::has('cs.reservasi.index')"
+                    :badge="$badgeStatusCs['menunggu_review'] ?? 0"
+                >
+                    Menunggu Review
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index', ['status' => 'perlu_datang']) : null"
+                    icon="walking"
+                    :disabled="! Route::has('cs.reservasi.index')"
+                    :badge="$badgeStatusCs['perlu_datang'] ?? 0"
+                >
+                    Perlu Datang
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index', ['status' => 'selesai_online']) : null"
+                    icon="check"
+                    :disabled="! Route::has('cs.reservasi.index')"
+                    :badge="$badgeStatusCs['selesai_online'] ?? 0"
+                >
+                    Selesai Online
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index', ['status' => 'selesai']) : null"
+                    icon="check-circle"
+                    :disabled="! Route::has('cs.reservasi.index')"
+                    :badge="$badgeStatusCs['selesai'] ?? 0"
+                >
+                    Selesai
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index', ['status' => 'dibatalkan']) : null"
+                    icon="x-mark"
+                    :disabled="! Route::has('cs.reservasi.index')"
+                    :badge="$badgeStatusCs['dibatalkan'] ?? 0"
+                >
+                    Dibatalkan
+                </x-dashboard.nav-item>
+            </x-dashboard.nav-group>
+
+            <x-dashboard.nav-group title="Lainnya">
+                <x-dashboard.nav-item
+                    :href="Route::has('cs.kalender.index') ? route('cs.kalender.index') : null"
+                    icon="calendar"
+                    :disabled="! Route::has('cs.kalender.index')"
+                >
+                    Kalender Jadwal
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('cs.riwayat.index') ? route('cs.riwayat.index') : null"
+                    icon="clipboard-list"
+                    :disabled="! Route::has('cs.riwayat.index')"
+                >
+                    Riwayat Reservasi
+                </x-dashboard.nav-item>
+            </x-dashboard.nav-group>
+
+            <x-dashboard.nav-group title="Pengaturan">
+                <x-dashboard.nav-item
+                    :href="Route::has('cs.profil.index') ? route('cs.profil.index') : null"
+                    icon="user"
+                    :disabled="! Route::has('cs.profil.index')"
+                >
+                    Profil Saya
+                </x-dashboard.nav-item>
+
+                <x-dashboard.nav-item
+                    :href="Route::has('cs.panduan.index') ? route('cs.panduan.index') : null"
+                    icon="megaphone"
+                    :disabled="! Route::has('cs.panduan.index')"
+                >
+                    Panduan
                 </x-dashboard.nav-item>
             </x-dashboard.nav-group>
         @else
@@ -148,7 +243,7 @@
             <p class="mt-1 text-xs leading-relaxed text-pln-slate-500">
                 Hubungi Contact Center PLN 123.
             </p>
-            
+            <a
                 href="tel:123"
                 class="mt-3 flex items-center justify-center gap-2 rounded-lg bg-pln-navy-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-pln-navy-800"
             >
