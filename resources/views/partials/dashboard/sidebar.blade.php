@@ -95,13 +95,13 @@
                     Jadwal &amp; Kuota
                 </x-dashboard.nav-item>
 
-                <x-dashboard.nav-item
-                    :href="Route::has('admin.pengumuman.index') ? route('admin.pengumuman.index') : null"
-                    icon="megaphone"
-                    :disabled="! Route::has('admin.pengumuman.index')"
-                >
-                    Pengumuman
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('admin.pengumuman.index')"
+					icon="megaphone"
+					:active="request()->routeIs('admin.pengumuman.*')"
+				>
+					Pengumuman
+				</x-dashboard.nav-item>
             </x-dashboard.nav-group>
 
             <x-dashboard.nav-group title="Pengaturan">
