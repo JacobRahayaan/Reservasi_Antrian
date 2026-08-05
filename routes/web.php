@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\LayananController;
+use App\Http\Controllers\Admin\PengumumanController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboardController;
 use App\Http\Controllers\Cs\ReservasiController as CsReservasiController;
 use App\Http\Controllers\LandingController;
@@ -43,6 +44,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('jadwal', JadwalController::class);
     Route::patch('jadwal/{jadwal}/toggle-status', [JadwalController::class, 'toggleStatus'])
         ->name('jadwal.toggle-status');
+
+    Route::resource('pengumuman', PengumumanController::class);
+    Route::patch('pengumuman/{pengumuman}/toggle-status', [PengumumanController::class, 'toggleStatus'])
+        ->name('pengumuman.toggle-status');
 });
 
 Route::prefix('cs')->name('cs.')->group(function () {
