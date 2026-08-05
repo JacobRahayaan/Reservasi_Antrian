@@ -92,6 +92,131 @@ class ReservasiService
     }
 
     /**
+     * Ubah jadwal (tanggal/jam) reservasi milik pelanggan. Kuota slot lama
+     * dikembalikan, kuota slot baru dikurangi, dan nomor antrean diterbitkan
+     * ulang jika tanggal berubah (nomor antrean terikat ke tanggal+layanan).
+     * Dibungkus transaction + row lock untuk mencegah race condition dan
+     * menjaga konsistensi kuota antara slot lama dan slot baru.
+     */
+    public function ubahJadwal(Reservasi $reservasi, Jadwal $jadwalBaru): Reservasi
+    {
+        return DB::transaction(function () use ($reservasi, $jadwalBaru) {
+            $reservasiTerkunci = Reservasi::query()->lockForUpdate()->findOrFail($reservasi->id);
+
+            if (! $reservasiTerkunci->status->bisaDiubahJadwalOlehPelanggan()) {
+                throw ValidationException::withMessages([
+                    'jadwal_id' => "Reservasi ini sudah tidak dapat diubah jadwalnya karena statusnya sudah \"{$reservasiTerkunci->status->label()}\".",
+                ]);
+            }
+
+            $jadwalLama = Jadwal::query()->lockForUpdate()->findOrFail($reservasiTerkunci->jadwal_id);
+            $jadwalBaruTerkunci = Jadwal::query()->lockForUpdate()->findOrFail($jadwalBaru->id);
+
+            if ((int) $jadwalBaruTerkunci->id === (int) $jadwalLama->id) {
+                throw ValidationException::withMessages([
+                    'jadwal_id' => 'Jadwal baru harus berbeda dari jadwal saat ini.',
+                ]);
+            }
+
+            if ((int) $jadwalBaruTerkunci->layanan_id !== (int) $reservasiTerkunci->layanan_id) {
+                throw ValidationException::withMessages([
+                    'jadwal_id' => 'Jadwal yang dipilih tidak sesuai dengan jenis layanan reservasi ini.',
+                ]);
+            }
+
+            if (! $jadwalBaruTerkunci->is_active || $jadwalBaruTerkunci->kuota_terpakai >= $jadwalBaruTerkunci->kuota_maksimal) {
+                throw ValidationException::withMessages([
+                    'jadwal_id' => 'Slot waktu yang dipilih sudah tidak tersedia, silakan pilih jadwal lain.',
+                ]);
+            }
+
+            $tanggalBerubah = ! $jadwalLama->tanggal->isSameDay($jadwalBaruTerkunci->tanggal);
+
+            $jadwalLama->decrement('kuota_terpakai');
+            $jadwalBaruTerkunci->increment('kuota_terpakai');
+
+            $nomorAntreanLama = $reservasiTerkunci->nomor_antrean;
+            $dataUpdate = ['jadwal_id' => $jadwalBaruTerkunci->id];
+
+            if ($tanggalBerubah) {
+                $layanan = Layanan::query()->findOrFail($reservasiTerkunci->layanan_id);
+
+                $dataUpdate['nomor_antrean'] = $this->generateNomorAntrean(
+                    $layanan,
+                    $jadwalBaruTerkunci->tanggal->toDateString()
+                );
+            }
+
+            $reservasiTerkunci->update($dataUpdate);
+
+            $keteranganNomor = $tanggalBerubah
+                ? " Nomor antrean berubah dari {$nomorAntreanLama} menjadi {$dataUpdate['nomor_antrean']}."
+                : '';
+
+            ReservasiNote::create([
+                'reservasi_id' => $reservasiTerkunci->id,
+                'petugas_id' => null,
+                'isi_catatan' => sprintf(
+                    'Pelanggan mengubah jadwal dari %s (%s-%s) menjadi %s (%s-%s).%s',
+                    $jadwalLama->tanggal->translatedFormat('d F Y'),
+                    substr($jadwalLama->jam_mulai, 0, 5),
+                    substr($jadwalLama->jam_selesai, 0, 5),
+                    $jadwalBaruTerkunci->tanggal->translatedFormat('d F Y'),
+                    substr($jadwalBaruTerkunci->jam_mulai, 0, 5),
+                    substr($jadwalBaruTerkunci->jam_selesai, 0, 5),
+                    $keteranganNomor
+                ),
+            ]);
+
+            return $reservasiTerkunci->fresh(['layanan', 'jadwal']);
+        });
+    }
+
+    /**
+     * Batalkan reservasi milik pelanggan. Mengembalikan kuota slot terkait
+     * (BR-09), mencatat riwayat status, dan menambahkan catatan otomatis.
+     * Dibungkus transaction + row lock untuk konsistensi kuota.
+     */
+    public function batalkan(Reservasi $reservasi, ?string $alasan): Reservasi
+    {
+        return DB::transaction(function () use ($reservasi, $alasan) {
+            $reservasiTerkunci = Reservasi::query()->lockForUpdate()->findOrFail($reservasi->id);
+
+            if (! $reservasiTerkunci->status->bisaDibatalkanOlehPelanggan()) {
+                throw ValidationException::withMessages([
+                    'nomor_hp_konfirmasi' => "Reservasi ini sudah tidak dapat dibatalkan karena statusnya sudah \"{$reservasiTerkunci->status->label()}\".",
+                ]);
+            }
+
+            $statusSebelum = $reservasiTerkunci->status;
+
+            $jadwal = Jadwal::query()->lockForUpdate()->findOrFail($reservasiTerkunci->jadwal_id);
+            $jadwal->decrement('kuota_terpakai');
+
+            $reservasiTerkunci->update(['status' => ReservasiStatus::Dibatalkan]);
+
+            $keteranganAlasan = $alasan ? " Alasan: {$alasan}" : '';
+
+            StatusHistory::create([
+                'reservasi_id' => $reservasiTerkunci->id,
+                'petugas_id' => null,
+                'status_sebelum' => $statusSebelum,
+                'status_sesudah' => ReservasiStatus::Dibatalkan,
+                'keterangan' => "Dibatalkan oleh pelanggan.{$keteranganAlasan}",
+                'changed_at' => now(),
+            ]);
+
+            ReservasiNote::create([
+                'reservasi_id' => $reservasiTerkunci->id,
+                'petugas_id' => null,
+                'isi_catatan' => "Reservasi ini telah dibatalkan oleh pelanggan.{$keteranganAlasan}",
+            ]);
+
+            return $reservasiTerkunci->fresh();
+        });
+    }
+
+    /**
      * Hasilkan nomor antrean unik dengan format [KODE_LAYANAN][3 digit urutan],
      * mis. A001, B002. Urutan direset setiap hari per jenis layanan.
      */

@@ -32,11 +32,6 @@ enum ReservasiStatus: string
         };
     }
 
-    /**
-     * Deskripsi singkat tahap status, dipakai sebagai teks default pada
-     * timeline riwayat status ketika belum ada catatan khusus untuk tahap
-     * tersebut (mis. tahap yang belum tercapai).
-     */
     public function hint(): string
     {
         return match ($this) {
@@ -48,11 +43,6 @@ enum ReservasiStatus: string
         };
     }
 
-    /**
-     * Deskripsi singkat khusus untuk konteks kerja Customer Service
-     * (dipakai pada halaman Detail Reservasi CS), berbeda nuansa dari
-     * hint() yang ditujukan untuk pelanggan.
-     */
     public function hintCs(): string
     {
         return match ($this) {
@@ -65,10 +55,6 @@ enum ReservasiStatus: string
     }
 
     /**
-     * Daftar status yang valid sebagai tujuan transisi dari status saat ini,
-     * sesuai state diagram bisnis (PRD BR-05). Status final (Selesai,
-     * Dibatalkan) mengembalikan array kosong — tidak ada transisi keluar.
-     *
      * @return array<int, self>
      */
     public function transisiValidBerikutnya(): array
@@ -84,5 +70,23 @@ enum ReservasiStatus: string
     public function bisaBertransisiKe(self $tujuan): bool
     {
         return in_array($tujuan, $this->transisiValidBerikutnya(), true);
+    }
+
+    /**
+     * Apakah pelanggan (bukan CS) masih diizinkan mengubah jadwal reservasi
+     * pada status ini. Sesuai FR-06 PRD: hanya Menunggu Review & Perlu Datang.
+     */
+    public function bisaDiubahJadwalOlehPelanggan(): bool
+    {
+        return in_array($this, [self::MenungguReview, self::PerluDatang], true);
+    }
+
+    /**
+     * Apakah pelanggan masih diizinkan membatalkan reservasi pada status
+     * ini. Sesuai BR-07 PRD: diizinkan selama belum Selesai atau Dibatalkan.
+     */
+    public function bisaDibatalkanOlehPelanggan(): bool
+    {
+        return ! in_array($this, [self::Selesai, self::Dibatalkan], true);
     }
 }
