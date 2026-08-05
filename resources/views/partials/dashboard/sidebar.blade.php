@@ -105,13 +105,13 @@
             </x-dashboard.nav-group>
 
             <x-dashboard.nav-group title="Pengaturan">
-                <x-dashboard.nav-item
-                    :href="Route::has('admin.pengaturan.index') ? route('admin.pengaturan.index') : null"
-                    icon="cog"
-                    :disabled="! Route::has('admin.pengaturan.index')"
-                >
-                    Pengaturan Sistem
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('admin.pengaturan.index')"
+					icon="cog"
+					:active="request()->routeIs('admin.pengaturan.*')"
+				>
+					Pengaturan Sistem
+				</x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
                     :href="Route::has('admin.profil.index') ? route('admin.profil.index') : null"
