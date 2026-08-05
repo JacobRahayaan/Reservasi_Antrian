@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\LayananController;
+use App\Http\Controllers\Admin\PengaturanSistemController;
 use App\Http\Controllers\Admin\PengumumanController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboardController;
 use App\Http\Controllers\Cs\ReservasiController as CsReservasiController;
@@ -48,6 +49,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('pengumuman', PengumumanController::class);
     Route::patch('pengumuman/{pengumuman}/toggle-status', [PengumumanController::class, 'toggleStatus'])
         ->name('pengumuman.toggle-status');
+
+    Route::get('pengaturan', [PengaturanSistemController::class, 'index'])->name('pengaturan.index');
+    Route::put('pengaturan', [PengaturanSistemController::class, 'update'])->name('pengaturan.update');
 });
 
 Route::prefix('cs')->name('cs.')->group(function () {
