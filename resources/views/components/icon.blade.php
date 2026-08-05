@@ -46,6 +46,7 @@
         'exclamation-triangle' => '<path stroke-linecap="round" stroke-linejoin="round" d="M10.3 4 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4a2 2 0 0 0-3.4 0Z" /><path stroke-linecap="round" d="M12 9v4M12 17h.01" />',
         'download' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />',
         'dots-vertical' => '<circle cx="12" cy="6" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="12" cy="18" r="1.2" />',
+        'filter' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4 5h16M7 12h10M11 19h2" />',
     ];
 
     $path = $icons[$name] ?? '';
