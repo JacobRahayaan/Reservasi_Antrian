@@ -36,10 +36,6 @@ class ReservasiController extends Controller
 
     /**
      * Ambil daftar jam tersedia untuk kombinasi layanan + tanggal (AJAX).
-     *
-     * Hanya mengembalikan jadwal yang AKTIF dan masih memiliki sisa kuota
-     * (App\Models\Jadwal::scopeTersediaUntukPelanggan), sesuai integrasi
-     * modul Kelola Jadwal & Kuota Sprint 9.
      */
     public function jadwalTersedia(Request $request): JsonResponse
     {
@@ -108,6 +104,24 @@ class ReservasiController extends Controller
         return Storage::disk('local')->download(
             $dokumen->path_file,
             $dokumen->nama_file_asli
+        );
+    }
+
+    /**
+     * Tampilkan (preview) dokumen pendukung di tab baru tanpa mengunduhnya
+     * secara paksa. Dipakai bersama oleh halaman pelanggan (Sprint 3) dan
+     * halaman Detail Reservasi Customer Service (Sprint 6) — satu logika
+     * file-serving, tanpa duplikasi controller.
+     */
+    public function previewDokumen(Reservasi $reservasi, DokumenReservasi $dokumen): StreamedResponse
+    {
+        abort_unless($dokumen->reservasi_id === $reservasi->id, 404);
+        abort_unless(Storage::disk('local')->exists($dokumen->path_file), 404);
+
+        return Storage::disk('local')->response(
+            $dokumen->path_file,
+            $dokumen->nama_file_asli,
+            ['Content-Disposition' => 'inline; filename="' . $dokumen->nama_file_asli . '"']
         );
     }
 }

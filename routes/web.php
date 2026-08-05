@@ -25,6 +25,8 @@ Route::prefix('reservasi')->name('reservasi.')->group(function () {
     Route::get('/{reservasi}', [ReservasiController::class, 'show'])->name('show');
     Route::get('/{reservasi}/dokumen/{dokumen}/download', [ReservasiController::class, 'downloadDokumen'])
         ->name('dokumen.download');
+    Route::get('/{reservasi}/dokumen/{dokumen}/preview', [ReservasiController::class, 'previewDokumen'])
+        ->name('dokumen.preview');
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -45,6 +47,9 @@ Route::prefix('cs')->name('cs.')->group(function () {
 
     Route::get('reservasi/export', [CsReservasiController::class, 'export'])->name('reservasi.export');
     Route::get('reservasi', [CsReservasiController::class, 'index'])->name('reservasi.index');
+    Route::get('reservasi/{reservasi}', [CsReservasiController::class, 'show'])->name('reservasi.show');
+    Route::put('reservasi/{reservasi}/status', [CsReservasiController::class, 'updateStatus'])->name('reservasi.status.update');
+    Route::post('reservasi/{reservasi}/catatan', [CsReservasiController::class, 'storeCatatan'])->name('reservasi.catatan.store');
 });
 
 Route::prefix('system')->name('system.')->group(function () {

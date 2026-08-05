@@ -4,9 +4,14 @@ namespace App\Http\Controllers\Cs;
 
 use App\Enums\ReservasiStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCatatanRequest;
+use App\Http\Requests\UpdateStatusReservasiRequest;
 use App\Models\Layanan;
+use App\Models\Petugas;
 use App\Models\Reservasi;
+use App\Services\ReservasiStatusService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -15,6 +20,10 @@ class ReservasiController extends Controller
 {
     private const STATUS_AKTIF = ['menunggu_review', 'perlu_datang'];
     private const STATUS_RIWAYAT = ['selesai_online', 'selesai', 'dibatalkan'];
+
+    public function __construct(private readonly ReservasiStatusService $statusService)
+    {
+    }
 
     /**
      * Tampilkan halaman Reservasi Customer Service dengan dua tab:
@@ -54,6 +63,62 @@ class ReservasiController extends Controller
             'tab' => $tab,
             'filters' => $filters,
         ]);
+    }
+
+    /**
+     * Tampilkan halaman Detail Reservasi Customer Service.
+     *
+     * Query dioptimalkan: setiap relasi hanya memuat kolom yang benar-benar
+     * ditampilkan, seluruh riwayat status & catatan diambil terurut
+     * kronologis dengan petugas ter-eager-load (mencegah N+1).
+     */
+    public function show(Reservasi $reservasi): View
+    {
+        $reservasi->load([
+            'layanan:id,nama_layanan,kode_layanan',
+            'jadwal:id,tanggal,jam_mulai,jam_selesai',
+            'dokumen:id,reservasi_id,nama_file_asli,mime_type,ukuran_file,created_at',
+            'statusHistories' => fn ($query) => $query->oldest('changed_at')->with('petugas:id,nama_petugas'),
+            'notes' => fn ($query) => $query->latest()->with('petugas:id,nama_petugas'),
+        ]);
+
+        return view('dashboard.cs.reservasi.show', compact('reservasi'));
+    }
+
+    /**
+     * Ubah status reservasi. Petugas yang bertindak disimulasikan lewat
+     * Petugas::aktifSaatIni() karena modul Login belum dibangun.
+     */
+    public function updateStatus(UpdateStatusReservasiRequest $request, Reservasi $reservasi): RedirectResponse
+    {
+        $statusBaru = ReservasiStatus::from($request->validated('status'));
+
+        $this->statusService->ubahStatus(
+            $reservasi,
+            $statusBaru,
+            $request->validated('keterangan'),
+            Petugas::aktifSaatIni()
+        );
+
+        return redirect()
+            ->route('cs.reservasi.show', $reservasi)
+            ->with('success', "Status reservasi berhasil diubah menjadi \"{$statusBaru->label()}\".");
+    }
+
+    /**
+     * Tambahkan catatan Customer Service baru pada reservasi.
+     */
+    public function storeCatatan(StoreCatatanRequest $request, Reservasi $reservasi): RedirectResponse
+    {
+        $this->statusService->tambahCatatan(
+            $reservasi,
+            $request->validated('isi_catatan'),
+            Petugas::aktifSaatIni()
+        );
+
+        return redirect()
+            ->route('cs.reservasi.show', $reservasi)
+            ->with('success', 'Catatan berhasil disimpan.');
     }
 
     /**
