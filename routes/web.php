@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboardController;
+use App\Http\Controllers\Cs\ReservasiController as CsReservasiController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ReservasiController;
 use App\Http\Controllers\System\ErrorDemoController;
@@ -41,6 +42,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 Route::prefix('cs')->name('cs.')->group(function () {
     Route::get('/dashboard', [CsDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('reservasi/export', [CsReservasiController::class, 'export'])->name('reservasi.export');
+    Route::get('reservasi', [CsReservasiController::class, 'index'])->name('reservasi.index');
 });
 
 Route::prefix('system')->name('system.')->group(function () {
