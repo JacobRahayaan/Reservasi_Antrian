@@ -133,55 +133,49 @@
             </x-dashboard.nav-group>
 
             <x-dashboard.nav-group title="Reservasi">
-                {{-- @assumsi: nama route berikut dibangun pada sprint reservasi CS berikutnya --}}
                 <x-dashboard.nav-item
-                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index') : null"
+                    :href="route('cs.reservasi.index')"
                     icon="clipboard-list"
-                    :disabled="! Route::has('cs.reservasi.index')"
+                    :active="request()->routeIs('cs.reservasi.*') && request()->query('tab', 'aktif') !== 'menunggu_review_link'"
                 >
                     Daftar Reservasi
                 </x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
-                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index', ['status' => 'menunggu_review']) : null"
+                    :href="route('cs.reservasi.index', ['tab' => 'aktif', 'status' => 'menunggu_review'])"
                     icon="clock"
-                    :disabled="! Route::has('cs.reservasi.index')"
                     :badge="$badgeStatusCs['menunggu_review'] ?? 0"
                 >
                     Menunggu Review
                 </x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
-                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index', ['status' => 'perlu_datang']) : null"
+                    :href="route('cs.reservasi.index', ['tab' => 'aktif', 'status' => 'perlu_datang'])"
                     icon="walking"
-                    :disabled="! Route::has('cs.reservasi.index')"
                     :badge="$badgeStatusCs['perlu_datang'] ?? 0"
                 >
                     Perlu Datang
                 </x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
-                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index', ['status' => 'selesai_online']) : null"
+                    :href="route('cs.reservasi.index', ['tab' => 'riwayat', 'status' => 'selesai_online'])"
                     icon="check"
-                    :disabled="! Route::has('cs.reservasi.index')"
                     :badge="$badgeStatusCs['selesai_online'] ?? 0"
                 >
                     Selesai Online
                 </x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
-                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index', ['status' => 'selesai']) : null"
+                    :href="route('cs.reservasi.index', ['tab' => 'riwayat', 'status' => 'selesai'])"
                     icon="check-circle"
-                    :disabled="! Route::has('cs.reservasi.index')"
                     :badge="$badgeStatusCs['selesai'] ?? 0"
                 >
                     Selesai
                 </x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
-                    :href="Route::has('cs.reservasi.index') ? route('cs.reservasi.index', ['status' => 'dibatalkan']) : null"
+                    :href="route('cs.reservasi.index', ['tab' => 'riwayat', 'status' => 'dibatalkan'])"
                     icon="x-mark"
-                    :disabled="! Route::has('cs.reservasi.index')"
                     :badge="$badgeStatusCs['dibatalkan'] ?? 0"
                 >
                     Dibatalkan
