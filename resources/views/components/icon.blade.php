@@ -47,6 +47,7 @@
         'download' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />',
         'dots-vertical' => '<circle cx="12" cy="6" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="12" cy="18" r="1.2" />',
         'filter' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4 5h16M7 12h10M11 19h2" />',
+        'paper-airplane' => '<path stroke-linecap="round" stroke-linejoin="round" d="m3 20 18-8L3 4l0 6.5 12 1.5-12 1.5Z" />',
     ];
 
     $path = $icons[$name] ?? '';

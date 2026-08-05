@@ -81,22 +81,31 @@ if (backToTopButton) {
 }
 
 /**
- * Character counter untuk textarea keluhan (halaman Reservasi).
+ * Character counter generik untuk textarea mana pun.
+ * Elemen dengan [data-char-count-target="key"] akan memperbarui elemen
+ * [data-char-counter="key"] setiap kali diketik. Dipakai oleh textarea
+ * keluhan (Form Reservasi pelanggan) dan textarea catatan Customer Service.
  */
-const keluhanTextarea = document.querySelector('[data-char-count-target="keluhan"]');
-const keluhanCounter = document.querySelector('[data-char-counter="keluhan"]');
+document.querySelectorAll('[data-char-count-target]').forEach((textarea) => {
+    const key = textarea.dataset.charCountTarget;
+    const counter = document.querySelector(`[data-char-counter="${key}"]`);
 
-if (keluhanTextarea && keluhanCounter) {
+    if (!counter) {
+        return;
+    }
+
+    const max = textarea.getAttribute('maxlength') ?? '';
+
     const updateCounter = () => {
-        keluhanCounter.textContent = `${keluhanTextarea.value.length} / 500`;
+        counter.textContent = max ? `${textarea.value.length} / ${max}` : `${textarea.value.length}`;
     };
 
-    keluhanTextarea.addEventListener('input', updateCounter);
+    textarea.addEventListener('input', updateCounter);
     updateCounter();
-}
+});
 
 /**
- * File upload preview (halaman Reservasi).
+ * File upload preview (halaman Reservasi pelanggan).
  */
 document.querySelectorAll('[data-file-upload]').forEach((wrapper) => {
     const input = wrapper.querySelector('[data-file-upload-input]');
@@ -208,8 +217,6 @@ if (layananOptions.length && tanggalInput && jadwalSelect) {
 
 /**
  * Collapse/expand konten pada mobile (halaman Detail Reservasi).
- * Elemen [data-toggle-target="id"] mengatur visibilitas #id dan
- * memutar ikon panah [data-toggle-icon] di dalam tombol.
  */
 document.querySelectorAll('[data-toggle-target]').forEach((button) => {
     const target = document.getElementById(button.dataset.toggleTarget);
@@ -228,8 +235,6 @@ document.querySelectorAll('[data-toggle-target]').forEach((button) => {
 
 /**
  * "Lihat Semua" dokumen (halaman Detail Reservasi).
- * Menampilkan seluruh dokumen yang tersembunyi (>3 item) dan
- * menyembunyikan kembali tombolnya setelah diklik.
  */
 document.querySelectorAll('[data-dokumen-toggle]').forEach((button) => {
     button.addEventListener('click', () => {
