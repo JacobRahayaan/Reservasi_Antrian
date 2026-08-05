@@ -19,4 +19,9 @@ class ReservasiNote extends Model
     {
         return $this->belongsTo(Reservasi::class);
     }
+
+    public function petugas(): BelongsTo
+    {
+        return $this->belongsTo(Petugas::class);
+    }
 }

@@ -47,4 +47,42 @@ enum ReservasiStatus: string
             self::Dibatalkan => 'Reservasi dibatalkan.',
         };
     }
+
+    /**
+     * Deskripsi singkat khusus untuk konteks kerja Customer Service
+     * (dipakai pada halaman Detail Reservasi CS), berbeda nuansa dari
+     * hint() yang ditujukan untuk pelanggan.
+     */
+    public function hintCs(): string
+    {
+        return match ($this) {
+            self::MenungguReview => 'Sedang di-review oleh Customer Service',
+            self::PerluDatang => 'Menunggu konfirmasi kehadiran',
+            self::SelesaiOnline => 'Selesai tanpa perlu datang ke kantor',
+            self::Selesai => 'Reservasi telah selesai',
+            self::Dibatalkan => 'Reservasi dibatalkan',
+        };
+    }
+
+    /**
+     * Daftar status yang valid sebagai tujuan transisi dari status saat ini,
+     * sesuai state diagram bisnis (PRD BR-05). Status final (Selesai,
+     * Dibatalkan) mengembalikan array kosong — tidak ada transisi keluar.
+     *
+     * @return array<int, self>
+     */
+    public function transisiValidBerikutnya(): array
+    {
+        return match ($this) {
+            self::MenungguReview => [self::PerluDatang, self::SelesaiOnline, self::Dibatalkan],
+            self::PerluDatang => [self::Selesai, self::Dibatalkan],
+            self::SelesaiOnline => [self::Selesai],
+            self::Selesai, self::Dibatalkan => [],
+        };
+    }
+
+    public function bisaBertransisiKe(self $tujuan): bool
+    {
+        return in_array($tujuan, $this->transisiValidBerikutnya(), true);
+    }
 }
