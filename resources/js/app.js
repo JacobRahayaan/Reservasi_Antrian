@@ -1,7 +1,7 @@
 import './bootstrap';
 
 /**
- * Modal handler (dipakai di layout dashboard).
+ * Modal handler (dipakai di layout dashboard & halaman detail reservasi pelanggan).
  */
 document.addEventListener('click', (event) => {
     const opener = event.target.closest('[data-modal-target]');
@@ -82,9 +82,6 @@ if (backToTopButton) {
 
 /**
  * Character counter generik untuk textarea mana pun.
- * Elemen dengan [data-char-count-target="key"] akan memperbarui elemen
- * [data-char-counter="key"] setiap kali diketik. Dipakai oleh textarea
- * keluhan (Form Reservasi pelanggan) dan textarea catatan Customer Service.
  */
 document.querySelectorAll('[data-char-count-target]').forEach((textarea) => {
     const key = textarea.dataset.charCountTarget;
@@ -137,7 +134,10 @@ document.querySelectorAll('[data-file-upload]').forEach((wrapper) => {
 });
 
 /**
- * Fetch jadwal tersedia berdasarkan jenis layanan + tanggal (halaman Reservasi).
+ * Fetch jadwal tersedia berdasarkan jenis layanan + tanggal.
+ * Dipakai oleh Form Reservasi (create) dan Form Ubah Jadwal.
+ * Mendukung `kecualiJadwalId` opsional (dipakai halaman Ubah Jadwal agar
+ * slot yang sedang dipakai reservasi ini tidak muncul kembali di daftar).
  */
 const layananOptions = document.querySelectorAll('[data-layanan-option]');
 const tanggalInput = document.querySelector('[data-tanggal-input]');
@@ -167,6 +167,10 @@ if (layananOptions.length && tanggalInput && jadwalSelect) {
             const url = new URL(config.jadwalTersediaUrl, window.location.origin);
             url.searchParams.set('layanan_id', layananId);
             url.searchParams.set('tanggal', tanggal);
+
+            if (config.kecualiJadwalId) {
+                url.searchParams.set('kecuali_jadwal_id', config.kecualiJadwalId);
+            }
 
             const response = await fetch(url, {
                 headers: { Accept: 'application/json' },

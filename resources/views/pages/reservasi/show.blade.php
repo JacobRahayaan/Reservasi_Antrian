@@ -34,18 +34,6 @@
                         </svg>
                         Unduh Bukti Reservasi
                     </button>
-
-                    <button
-                        type="button"
-                        disabled
-                        title="Pembatalan reservasi tersedia pada sprint fitur berikutnya"
-                        class="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-status-cancel/30 bg-white px-4 py-2.5 text-sm font-semibold text-status-cancel opacity-60"
-                    >
-                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m2 0v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7h10Z" />
-                        </svg>
-                        Batalkan Reservasi
-                    </button>
                 </div>
             </div>
         </div>
@@ -56,6 +44,12 @@
         @if (session('success'))
             <x-alert variant="success" title="Berhasil" dismissible class="mb-6 print:hidden">
                 {{ session('success') }}
+            </x-alert>
+        @endif
+
+        @if (session('error'))
+            <x-alert variant="danger" title="Tidak dapat diproses" dismissible class="mb-6 print:hidden">
+                {{ session('error') }}
             </x-alert>
         @endif
 
@@ -79,12 +73,6 @@
                     <span class="font-semibold text-pln-navy-900">Nomor antrean akan dipanggil sesuai urutan.</span>
                 </p>
 
-				<img
-					src="{{ asset('images/waiting-person.png') }}"
-					alt="Ilustrasi Menunggu Antrean"
-					class="mx-auto mt-5 max-h-56 w-full max-w-xs object-contain"
-				/>
-
                 <div class="mt-5 flex flex-col gap-2.5 sm:hidden">
                     <button
                         type="button"
@@ -96,14 +84,6 @@
                         </svg>
                         Unduh Bukti
                     </button>
-                    <button
-                        type="button"
-                        disabled
-                        title="Pembatalan reservasi tersedia pada sprint fitur berikutnya"
-                        class="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-status-cancel/30 bg-white px-4 py-2.5 text-sm font-semibold text-status-cancel opacity-60"
-                    >
-                        Batalkan
-                    </button>
                 </div>
             </x-card>
 
@@ -114,22 +94,9 @@
                         <x-icon name="document-text" class="h-5 w-5 text-pln-navy-700" />
                         Informasi Reservasi
                     </h2>
-
-                    <button
-                        type="button"
-                        data-toggle-target="informasi-reservasi-content"
-                        class="flex h-8 w-8 items-center justify-center rounded-lg text-pln-slate-400 transition hover:bg-pln-slate-100 lg:hidden"
-                        aria-expanded="true"
-                        aria-controls="informasi-reservasi-content"
-                        aria-label="Tampilkan/sembunyikan detail informasi reservasi"
-                    >
-                        <svg data-toggle-icon viewBox="0 0 24 24" class="h-4 w-4 transition-transform" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m18 15-6-6-6 6" />
-                        </svg>
-                    </button>
                 </x-slot:header>
 
-                <div id="informasi-reservasi-content" class="grid gap-x-6 gap-y-5 lg:!grid lg:grid-cols-2">
+                <div class="grid gap-x-6 gap-y-5 lg:grid-cols-2">
                     <x-reservasi.info-row icon="ticket" label="Kode Reservasi" :value="$reservasi->kode_reservasi" />
                     <x-reservasi.info-row icon="user" label="Nama" :value="$reservasi->nama" />
                     <x-reservasi.info-row icon="bolt" label="Jenis Layanan" :value="$reservasi->layanan->nama_layanan" />
@@ -178,16 +145,6 @@
                         <x-icon name="document-text" class="h-5 w-5 text-pln-navy-700" />
                         Dokumen yang Diunggah
                     </h2>
-
-                    @if ($reservasi->dokumen->count() > 3)
-                        <button
-                            type="button"
-                            data-dokumen-toggle
-                            class="text-sm font-semibold text-pln-navy-700 hover:text-pln-navy-900"
-                        >
-                            Lihat Semua
-                        </button>
-                    @endif
                 </x-slot:header>
 
                 @if ($reservasi->dokumen->isEmpty())
@@ -198,11 +155,21 @@
                 @else
                     <div class="space-y-2.5">
                         @foreach ($reservasi->dokumen as $dokumen)
-                            <div @class(['hidden' => $loop->index >= 3])>
-                                <x-reservasi.document-item
-                                    :dokumen="$dokumen"
-                                    :download-url="route('reservasi.dokumen.download', ['reservasi' => $reservasi, 'dokumen' => $dokumen])"
-                                />
+                            <div class="flex items-center gap-3 rounded-lg border border-pln-slate-200 bg-white px-4 py-3">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pln-navy-900/5 text-pln-navy-700">
+                                    <x-icon name="document-text" class="h-4 w-4" />
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium text-pln-slate-900">{{ $dokumen->nama_file_asli }}</p>
+                                    <p class="text-xs text-pln-slate-400">{{ \Illuminate\Support\Number::fileSize($dokumen->ukuran_file, precision: 1) }}</p>
+                                </div>
+                                <a
+                                    href="{{ route('reservasi.dokumen.download', ['reservasi' => $reservasi, 'dokumen' => $dokumen]) }}"
+                                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-pln-navy-700 transition hover:bg-pln-slate-100"
+                                    aria-label="Unduh {{ $dokumen->nama_file_asli }}"
+                                >
+                                    <x-icon name="download" class="h-4 w-4" />
+                                </a>
                             </div>
                         @endforeach
                     </div>
@@ -212,63 +179,146 @@
             {{-- Kartu Catatan Petugas --}}
             <x-card padding="p-6">
                 <x-slot:header>
-                    <h2 class="flex items-center gap-2 font-display text-base font-semibold text-pln-navy-900">
-                        <x-icon name="headphones" class="h-5 w-5 text-pln-navy-700" />
-                        Catatan Terakhir dari Petugas
-                    </h2>
+                    <h2 class="font-display text-base font-semibold text-pln-navy-900">Catatan Terakhir dari Petugas</h2>
                 </x-slot:header>
 
-                <x-reservasi.note-card :note="$reservasi->notes->first()" />
+                @if ($reservasi->notes->isEmpty())
+                    <x-empty-state
+                        title="Belum ada catatan"
+                        description="Catatan dari Customer Service akan tampil di sini setelah reservasi Anda direview."
+                    />
+                @else
+                    @foreach ($reservasi->notes as $note)
+                        <p class="text-sm leading-relaxed text-pln-slate-700">{{ $note->isi_catatan }}</p>
+                        <p class="mt-2 text-xs text-pln-slate-400">{{ $note->created_at->translatedFormat('d F Y, H:i') }}</p>
+                    @endforeach
+                @endif
             </x-card>
 
         </div>
 
-        {{-- Informasi Penting --}}
-        <div class="mt-6 rounded-2xl bg-pln-slate-100/80 p-6">
-            <h2 class="flex items-center gap-2 font-display text-base font-semibold text-pln-navy-900">
-                <x-icon name="clock" class="h-5 w-5 text-pln-navy-700" />
-                Informasi Penting
-            </h2>
-
-            <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                <x-reservasi.info-highlight-bar
-                    icon="bolt"
-                    text="Harap datang 15 menit sebelum jadwal kedatangan Anda."
-                />
-                <x-reservasi.info-highlight-bar
-                    icon="document-text"
-                    text="Bawa dokumen asli sesuai persyaratan layanan."
-                />
-                <x-reservasi.info-highlight-bar
-                    icon="ticket"
-                    text="Nomor antrean akan dipanggil sesuai urutan."
-                />
-                <x-reservasi.info-highlight-bar
-                    icon="clock"
-                    text="Jika tidak hadir, reservasi akan dibatalkan otomatis."
-                />
-            </div>
-        </div>
-
-        {{-- Bantuan --}}
         <div class="mt-6 print:hidden">
             <x-landing.help-banner />
         </div>
 
-        {{-- Aksi Navigasi --}}
-        <div class="mt-6 flex flex-col gap-3 sm:flex-row print:hidden">
-            <x-button href="{{ route('landing') }}" variant="ghost" size="md">
-                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-                Kembali ke Beranda
-            </x-button>
-            <x-button href="{{ route('reservasi.create') }}" variant="primary" size="md">
-                Buat Reservasi Baru
-                <x-icon name="arrow-right" class="h-4 w-4" />
-            </x-button>
+        <div class="mt-6 grid gap-6 lg:grid-cols-3 print:hidden">
+            <div class="lg:col-span-2">
+                <x-button href="{{ route('landing') }}" variant="ghost" size="md">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Kembali ke Beranda
+                </x-button>
+            </div>
+
+            {{-- Kartu Aksi: Ubah Jadwal & Batalkan Reservasi --}}
+            <x-card>
+                <x-slot:header>
+                    <h2 class="font-display text-base font-semibold text-pln-navy-900">Aksi</h2>
+                </x-slot:header>
+
+                <div class="space-y-3">
+                    @if ($reservasi->status->bisaDiubahJadwalOlehPelanggan())
+                        <x-button href="{{ route('reservasi.ubah-jadwal.edit', $reservasi) }}" variant="ghost" size="md" class="w-full">
+                            <x-icon name="calendar" class="h-4 w-4" />
+                            Ubah Jadwal
+                        </x-button>
+                    @else
+                        <x-button
+                            variant="ghost"
+                            size="md"
+                            class="w-full"
+                            disabled
+                            title="Reservasi dengan status &quot;{{ $reservasi->status->label() }}&quot; tidak dapat diubah jadwalnya"
+                        >
+                            Ubah Jadwal
+                        </x-button>
+                    @endif
+
+                    @if ($reservasi->status->bisaDibatalkanOlehPelanggan())
+                        <button
+                            type="button"
+                            data-modal-target="modal-batalkan-reservasi"
+                            class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-status-cancel/30 px-4 py-2.5 text-sm font-medium text-status-cancel transition hover:bg-status-cancel/5"
+                        >
+                            <x-icon name="x-mark" class="h-4 w-4" />
+                            Batalkan Reservasi
+                        </button>
+                    @else
+                        <x-button
+                            variant="ghost"
+                            size="md"
+                            class="w-full"
+                            disabled
+                            title="Reservasi dengan status &quot;{{ $reservasi->status->label() }}&quot; tidak dapat dibatalkan"
+                        >
+                            Batalkan Reservasi
+                        </x-button>
+                    @endif
+
+                    <x-button href="tel:123" variant="primary" size="md" class="w-full">
+                        <x-icon name="phone" class="h-4 w-4" />
+                        Hubungi Customer Service
+                    </x-button>
+                </div>
+            </x-card>
         </div>
 
     </div>
+
+    @if ($reservasi->status->bisaDibatalkanOlehPelanggan())
+        <x-modal id="modal-batalkan-reservasi" title="Batalkan Reservasi" size="sm">
+            <form id="form-batalkan-reservasi" action="{{ route('reservasi.batalkan', $reservasi) }}" method="POST">
+                @csrf
+                @method('DELETE')
+
+                <p class="text-sm leading-relaxed text-pln-slate-600">
+                    Reservasi <strong>{{ $reservasi->kode_reservasi }}</strong> dengan nomor antrean
+                    <strong>{{ $reservasi->nomor_antrean }}</strong> akan dibatalkan dan tidak dapat dikembalikan.
+                </p>
+
+                <div class="mt-4">
+                    <x-input
+                        label="Konfirmasi Nomor HP"
+                        name="nomor_hp_konfirmasi"
+                        placeholder="Masukkan nomor HP yang digunakan saat reservasi"
+                        required
+                        :error="$errors->first('nomor_hp_konfirmasi')"
+                    />
+                </div>
+
+                <div class="mt-4">
+                    <label for="alasan" class="mb-1.5 block text-sm font-medium text-pln-slate-900">
+                        Alasan pembatalan (opsional)
+                    </label>
+                    <textarea
+                        name="alasan"
+                        id="alasan"
+                        rows="3"
+                        maxlength="255"
+                        placeholder="Contoh: Sudah tidak diperlukan"
+                        class="block w-full rounded-lg border border-pln-slate-200 px-3.5 py-2.5 text-sm text-pln-slate-900 placeholder:text-pln-slate-400 focus:border-pln-navy-700 focus:outline-none focus:ring-2 focus:ring-pln-navy-700/20"
+                    >{{ old('alasan') }}</textarea>
+                </div>
+            </form>
+
+            <x-slot:footer>
+                <button
+                    type="button"
+                    data-modal-close
+                    class="rounded-lg border border-pln-slate-300 px-4 py-2 text-sm font-medium text-pln-slate-600 hover:bg-pln-slate-50"
+                >
+                    Batal
+                </button>
+                <button
+                    type="submit"
+                    form="form-batalkan-reservasi"
+                    class="rounded-lg bg-status-cancel px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+                >
+                    Ya, Batalkan Reservasi
+                </button>
+            </x-slot:footer>
+        </x-modal>
+    @endif
 
 @endsection
