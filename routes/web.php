@@ -23,6 +23,9 @@ Route::prefix('reservasi')->name('reservasi.')->group(function () {
     Route::get('/jadwal-tersedia', [ReservasiController::class, 'jadwalTersedia'])->name('jadwal-tersedia');
     Route::post('/', [ReservasiController::class, 'store'])->name('store');
     Route::get('/{reservasi}', [ReservasiController::class, 'show'])->name('show');
+    Route::get('/{reservasi}/ubah-jadwal', [ReservasiController::class, 'editJadwal'])->name('ubah-jadwal.edit');
+    Route::put('/{reservasi}/ubah-jadwal', [ReservasiController::class, 'updateJadwal'])->name('ubah-jadwal.update');
+    Route::delete('/{reservasi}/batalkan', [ReservasiController::class, 'batalkan'])->name('batalkan');
     Route::get('/{reservasi}/dokumen/{dokumen}/download', [ReservasiController::class, 'downloadDokumen'])
         ->name('dokumen.download');
     Route::get('/{reservasi}/dokumen/{dokumen}/preview', [ReservasiController::class, 'previewDokumen'])

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BatalkanReservasiRequest;
 use App\Http\Requests\StoreReservasiRequest;
+use App\Http\Requests\UpdateJadwalPelangganRequest;
 use App\Models\DokumenReservasi;
 use App\Models\Jadwal;
 use App\Models\Layanan;
@@ -36,18 +38,26 @@ class ReservasiController extends Controller
 
     /**
      * Ambil daftar jam tersedia untuk kombinasi layanan + tanggal (AJAX).
+     * Parameter opsional `kecuali_jadwal_id` dipakai halaman Ubah Jadwal
+     * agar slot yang sedang dipakai reservasi ini tidak muncul kembali di
+     * daftar pilihan (memaksa memilih jadwal baru yang berbeda).
      */
     public function jadwalTersedia(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'layanan_id' => ['required', 'integer', 'exists:layanans,id'],
             'tanggal' => ['required', 'date', 'after_or_equal:today'],
+            'kecuali_jadwal_id' => ['nullable', 'integer'],
         ]);
 
         $jadwals = Jadwal::query()
             ->tersediaUntukPelanggan()
             ->where('layanan_id', $validated['layanan_id'])
             ->whereDate('tanggal', $validated['tanggal'])
+            ->when(
+                ! empty($validated['kecuali_jadwal_id']),
+                fn ($query) => $query->where('id', '!=', $validated['kecuali_jadwal_id'])
+            )
             ->orderBy('jam_mulai')
             ->get(['id', 'jam_mulai', 'jam_selesai', 'kuota_maksimal', 'kuota_terpakai']);
 
@@ -94,6 +104,52 @@ class ReservasiController extends Controller
     }
 
     /**
+     * Tampilkan form ubah jadwal. Ditolak (redirect dengan pesan) jika
+     * status reservasi tidak lagi mengizinkan perubahan jadwal.
+     */
+    public function editJadwal(Reservasi $reservasi): View|RedirectResponse
+    {
+        if (! $reservasi->status->bisaDiubahJadwalOlehPelanggan()) {
+            return redirect()
+                ->route('reservasi.show', $reservasi)
+                ->with('error', "Reservasi dengan status \"{$reservasi->status->label()}\" tidak dapat diubah jadwalnya.");
+        }
+
+        $reservasi->load([
+            'layanan:id,nama_layanan',
+            'jadwal:id,tanggal,jam_mulai,jam_selesai',
+        ]);
+
+        return view('pages.reservasi.ubah-jadwal', compact('reservasi'));
+    }
+
+    /**
+     * Proses perubahan jadwal reservasi.
+     */
+    public function updateJadwal(UpdateJadwalPelangganRequest $request, Reservasi $reservasi): RedirectResponse
+    {
+        $jadwalBaru = Jadwal::query()->findOrFail($request->validated('jadwal_id'));
+
+        $this->reservasiService->ubahJadwal($reservasi, $jadwalBaru);
+
+        return redirect()
+            ->route('reservasi.show', $reservasi)
+            ->with('success', 'Jadwal reservasi berhasil diubah.');
+    }
+
+    /**
+     * Proses pembatalan reservasi.
+     */
+    public function batalkan(BatalkanReservasiRequest $request, Reservasi $reservasi): RedirectResponse
+    {
+        $this->reservasiService->batalkan($reservasi, $request->validated('alasan'));
+
+        return redirect()
+            ->route('reservasi.show', $reservasi)
+            ->with('success', 'Reservasi berhasil dibatalkan.');
+    }
+
+    /**
      * Unduh dokumen pendukung milik sebuah reservasi.
      */
     public function downloadDokumen(Reservasi $reservasi, DokumenReservasi $dokumen): StreamedResponse
@@ -109,9 +165,8 @@ class ReservasiController extends Controller
 
     /**
      * Tampilkan (preview) dokumen pendukung di tab baru tanpa mengunduhnya
-     * secara paksa. Dipakai bersama oleh halaman pelanggan (Sprint 3) dan
-     * halaman Detail Reservasi Customer Service (Sprint 6) — satu logika
-     * file-serving, tanpa duplikasi controller.
+     * secara paksa. Dipakai bersama oleh halaman pelanggan dan halaman
+     * Detail Reservasi Customer Service — satu logika file-serving.
      */
     public function previewDokumen(Reservasi $reservasi, DokumenReservasi $dokumen): StreamedResponse
     {
