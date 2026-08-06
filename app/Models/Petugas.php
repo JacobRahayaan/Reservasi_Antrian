@@ -38,10 +38,8 @@ class Petugas extends Model
 
     /**
      * Simulasi "petugas yang sedang login", karena fitur autentikasi belum
-     * dibangun (dilarang eksplisit di Sprint 6). Mengembalikan petugas aktif
-     * pertama di database. Ganti dengan `auth()->user()->petugas` begitu
-     * modul Login dibangun — tidak ada logika lain yang bergantung pada
-     * detail implementasi method ini selain nilai kembaliannya.
+     * dibangun. Mengembalikan petugas aktif pertama di database. Ganti
+     * dengan `auth()->user()->petugas` begitu modul Login dibangun.
      */
     public static function aktifSaatIni(): self
     {
@@ -49,5 +47,16 @@ class Petugas extends Model
             ->where('is_active', true)
             ->oldest('id')
             ->firstOrFail();
+    }
+
+    /**
+     * Apakah petugas ini pernah bertindak di sistem (menulis catatan atau
+     * mengubah status reservasi). Dipakai untuk menentukan apakah petugas
+     * boleh dihapus permanen atau harus dinonaktifkan saja — mencegah
+     * kehilangan jejak audit pada riwayat status/catatan yang sudah tercatat.
+     */
+    public function pernahBertindak(): bool
+    {
+        return $this->statusHistories()->exists() || $this->notes()->exists();
     }
 }
