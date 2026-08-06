@@ -59,21 +59,21 @@
 					Kalender Jadwal
 				</x-dashboard.nav-item>
 
-                <x-dashboard.nav-item
-                    :href="Route::has('admin.laporan.index') ? route('admin.laporan.index') : null"
-                    icon="chart-bar"
-                    :disabled="! Route::has('admin.laporan.index')"
-                >
-                    Laporan
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('admin.laporan.index')"
+					icon="chart-bar"
+					:active="request()->routeIs('admin.laporan.*')"
+				>
+					Laporan
+				</x-dashboard.nav-item>
 
-                <x-dashboard.nav-item
-                    :href="Route::has('admin.pengguna.index') ? route('admin.pengguna.index') : null"
-                    icon="users"
-                    :disabled="! Route::has('admin.pengguna.index')"
-                >
-                    Pengguna
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('admin.pengguna.index')"
+					icon="users"
+					:active="request()->routeIs('admin.pengguna.*')"
+				>
+					Pengguna
+				</x-dashboard.nav-item>
             </x-dashboard.nav-group>
 
             <x-dashboard.nav-group title="Pengelolaan">
@@ -113,13 +113,13 @@
 					Pengaturan Sistem
 				</x-dashboard.nav-item>
 
-                <x-dashboard.nav-item
-                    :href="Route::has('admin.profil.index') ? route('admin.profil.index') : null"
-                    icon="user"
-                    :disabled="! Route::has('admin.profil.index')"
-                >
-                    Profil Saya
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('admin.profil.index')"
+					icon="user"
+					:active="request()->routeIs('admin.profil.*')"
+				>
+					Profil Saya
+				</x-dashboard.nav-item>
             </x-dashboard.nav-group>
         @elseif ($isCs)
             <x-dashboard.nav-group title="Menu Utama">
@@ -201,13 +201,13 @@
             </x-dashboard.nav-group>
 
             <x-dashboard.nav-group title="Pengaturan">
-                <x-dashboard.nav-item
-                    :href="Route::has('cs.profil.index') ? route('cs.profil.index') : null"
-                    icon="user"
-                    :disabled="! Route::has('cs.profil.index')"
-                >
-                    Profil Saya
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('cs.profil.index')"
+					icon="user"
+					:active="request()->routeIs('cs.profil.*')"
+				>
+					Profil Saya
+				</x-dashboard.nav-item>
 
 				<x-dashboard.nav-item
 					:href="route('cs.panduan.index')"

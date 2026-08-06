@@ -3,13 +3,17 @@
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\KalenderController as AdminKalenderController;
+use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Admin\PengaturanSistemController;
 use App\Http\Controllers\Admin\PengumumanController;
+use App\Http\Controllers\Admin\PetugasController;
+use App\Http\Controllers\Admin\ProfilController as AdminProfilController;
 use App\Http\Controllers\Admin\ReservasiController as AdminReservasiController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboardController;
 use App\Http\Controllers\Cs\KalenderController as CsKalenderController;
 use App\Http\Controllers\Cs\PanduanController as CsPanduanController;
+use App\Http\Controllers\Cs\ProfilController as CsProfilController;
 use App\Http\Controllers\Cs\ReservasiController as CsReservasiController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ReservasiController;
@@ -46,6 +50,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('kalender-jadwal', [AdminKalenderController::class, 'index'])->name('kalender.index');
 
+    Route::get('laporan/export', [LaporanController::class, 'export'])->name('laporan.export');
+    Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
+
     Route::resource('layanan', LayananController::class);
     Route::patch('layanan/{layanan}/toggle-status', [LayananController::class, 'toggleStatus'])
         ->name('layanan.toggle-status');
@@ -59,8 +66,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::patch('pengumuman/{pengumuman}/toggle-status', [PengumumanController::class, 'toggleStatus'])
         ->name('pengumuman.toggle-status');
 
+    Route::resource('pengguna', PetugasController::class);
+    Route::patch('pengguna/{pengguna}/toggle-status', [PetugasController::class, 'toggleStatus'])
+        ->name('pengguna.toggle-status');
+
     Route::get('pengaturan', [PengaturanSistemController::class, 'index'])->name('pengaturan.index');
     Route::put('pengaturan', [PengaturanSistemController::class, 'update'])->name('pengaturan.update');
+
+    Route::get('profil', [AdminProfilController::class, 'index'])->name('profil.index');
 });
 
 Route::prefix('cs')->name('cs.')->group(function () {
@@ -75,6 +88,9 @@ Route::prefix('cs')->name('cs.')->group(function () {
     Route::get('kalender-jadwal', [CsKalenderController::class, 'index'])->name('kalender.index');
 
     Route::get('panduan', [CsPanduanController::class, 'index'])->name('panduan.index');
+
+    Route::get('profil', [CsProfilController::class, 'index'])->name('profil.index');
+    Route::put('profil', [CsProfilController::class, 'update'])->name('profil.update');
 });
 
 Route::prefix('system')->name('system.')->group(function () {
