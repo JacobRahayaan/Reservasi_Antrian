@@ -49,6 +49,7 @@
                     <li><a href="#layanan" class="hover:text-pln-navy-900">Pasang Baru / Tambah Daya</a></li>
                     <li><a href="#layanan" class="hover:text-pln-navy-900">Tagihan Bulanan</a></li>
                     <li><a href="#layanan" class="hover:text-pln-navy-900">Gangguan</a></li>
+                    <li><a href="{{ route('reservasi.cek-status.form') }}" class="hover:text-pln-navy-900">Cek Status Reservasi</a></li>
                 </ul>
             </div>
 
