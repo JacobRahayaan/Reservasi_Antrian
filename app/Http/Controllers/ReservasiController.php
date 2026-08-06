@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\BatalkanReservasiRequest;
+use App\Http\Requests\CekStatusReservasiRequest;
 use App\Http\Requests\StoreReservasiRequest;
 use App\Http\Requests\UpdateJadwalPelangganRequest;
 use App\Models\DokumenReservasi;
@@ -38,9 +39,6 @@ class ReservasiController extends Controller
 
     /**
      * Ambil daftar jam tersedia untuk kombinasi layanan + tanggal (AJAX).
-     * Parameter opsional `kecuali_jadwal_id` dipakai halaman Ubah Jadwal
-     * agar slot yang sedang dipakai reservasi ini tidak muncul kembali di
-     * daftar pilihan (memaksa memilih jadwal baru yang berbeda).
      */
     public function jadwalTersedia(Request $request): JsonResponse
     {
@@ -147,6 +145,48 @@ class ReservasiController extends Controller
         return redirect()
             ->route('reservasi.show', $reservasi)
             ->with('success', 'Reservasi berhasil dibatalkan.');
+    }
+
+    /**
+     * Tampilkan form Cek Status Reservasi (FR-05). Titik masuk bagi
+     * pelanggan yang sudah tidak memiliki tautan langsung ke halaman
+     * Detail Reservasi mereka.
+     */
+    public function cekStatusForm(): View
+    {
+        return view('pages.reservasi.cek-status');
+    }
+
+    /**
+     * Proses pencarian reservasi berdasarkan kombinasi Nomor Antrean +
+     * Nomor HP (BR-10). Nomor antrean dipakai untuk mempersempit kandidat
+     * lewat query terindeks, lalu nomor HP dicocokkan di PHP setelah
+     * dinormalisasi (mengabaikan perbedaan format 0/62/+62).
+     *
+     * Selalu mengembalikan pesan error generik (ERR-05) tanpa membedakan
+     * field mana yang salah, untuk mencegah enumeration attack.
+     */
+    public function cekStatusProses(CekStatusReservasiRequest $request): RedirectResponse
+    {
+        $nomorHpDicari = preg_replace('/\D/', '', $request->validated('nomor_hp'));
+
+        $reservasi = Reservasi::query()
+            ->where('nomor_antrean', $request->validated('nomor_antrean'))
+            ->latest()
+            ->get(['id', 'kode_reservasi', 'nomor_antrean', 'nomor_hp'])
+            ->first(function (Reservasi $kandidat) use ($nomorHpDicari) {
+                return preg_replace('/\D/', '', $kandidat->nomor_hp) === $nomorHpDicari;
+            });
+
+        if (! $reservasi) {
+            return back()
+                ->withInput($request->except('nomor_hp'))
+                ->withErrors([
+                    'nomor_antrean' => 'Data reservasi tidak ditemukan. Periksa kembali nomor antrean dan nomor HP Anda.',
+                ]);
+        }
+
+        return redirect()->route('reservasi.show', $reservasi);
     }
 
     /**

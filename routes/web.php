@@ -32,6 +32,12 @@ Route::prefix('reservasi')->name('reservasi.')->group(function () {
     Route::get('/create', [ReservasiController::class, 'create'])->name('create');
     Route::get('/jadwal-tersedia', [ReservasiController::class, 'jadwalTersedia'])->name('jadwal-tersedia');
     Route::post('/', [ReservasiController::class, 'store'])->name('store');
+
+    Route::get('/cek-status', [ReservasiController::class, 'cekStatusForm'])->name('cek-status.form');
+    Route::post('/cek-status', [ReservasiController::class, 'cekStatusProses'])
+        ->middleware('throttle:6,1')
+        ->name('cek-status.proses');
+
     Route::get('/{reservasi}', [ReservasiController::class, 'show'])->name('show');
     Route::get('/{reservasi}/ubah-jadwal', [ReservasiController::class, 'editJadwal'])->name('ubah-jadwal.edit');
     Route::put('/{reservasi}/ubah-jadwal', [ReservasiController::class, 'updateJadwal'])->name('ubah-jadwal.update');
