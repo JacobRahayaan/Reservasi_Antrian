@@ -191,13 +191,13 @@
 					Kalender Jadwal
 				</x-dashboard.nav-item>
 
-                <x-dashboard.nav-item
-                    :href="Route::has('cs.riwayat.index') ? route('cs.riwayat.index') : null"
-                    icon="clipboard-list"
-                    :disabled="! Route::has('cs.riwayat.index')"
-                >
-                    Riwayat Reservasi
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('cs.reservasi.index', ['tab' => 'riwayat'])"
+					icon="clipboard-list"
+					:active="request()->routeIs('cs.reservasi.*') && request()->query('tab') === 'riwayat'"
+				>
+					Riwayat Reservasi
+				</x-dashboard.nav-item>
             </x-dashboard.nav-group>
 
             <x-dashboard.nav-group title="Pengaturan">
@@ -209,13 +209,13 @@
                     Profil Saya
                 </x-dashboard.nav-item>
 
-                <x-dashboard.nav-item
-                    :href="Route::has('cs.panduan.index') ? route('cs.panduan.index') : null"
-                    icon="megaphone"
-                    :disabled="! Route::has('cs.panduan.index')"
-                >
-                    Panduan
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('cs.panduan.index')"
+					icon="headphones"
+					:active="request()->routeIs('cs.panduan.*')"
+				>
+					Panduan
+				</x-dashboard.nav-item>
             </x-dashboard.nav-group>
         @else
             <x-dashboard.nav-group title="Sistem">
