@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PengumumanController;
 use App\Http\Controllers\Admin\ReservasiController as AdminReservasiController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboardController;
 use App\Http\Controllers\Cs\KalenderController as CsKalenderController;
+use App\Http\Controllers\Cs\PanduanController as CsPanduanController;
 use App\Http\Controllers\Cs\ReservasiController as CsReservasiController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ReservasiController;
@@ -72,6 +73,8 @@ Route::prefix('cs')->name('cs.')->group(function () {
     Route::post('reservasi/{reservasi}/catatan', [CsReservasiController::class, 'storeCatatan'])->name('reservasi.catatan.store');
 
     Route::get('kalender-jadwal', [CsKalenderController::class, 'index'])->name('kalender.index');
+
+    Route::get('panduan', [CsPanduanController::class, 'index'])->name('panduan.index');
 });
 
 Route::prefix('system')->name('system.')->group(function () {
