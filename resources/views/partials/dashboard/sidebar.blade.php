@@ -43,21 +43,21 @@
                     Dashboard
                 </x-dashboard.nav-item>
 
-                <x-dashboard.nav-item
-                    :href="Route::has('admin.reservasi.index') ? route('admin.reservasi.index') : null"
-                    icon="clipboard-list"
-                    :disabled="! Route::has('admin.reservasi.index')"
-                >
-                    Reservasi
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('admin.reservasi.index')"
+					icon="clipboard-list"
+					:active="request()->routeIs('admin.reservasi.*')"
+				>
+					Reservasi
+				</x-dashboard.nav-item>
 
-                <x-dashboard.nav-item
-                    :href="Route::has('admin.kalender.index') ? route('admin.kalender.index') : null"
-                    icon="calendar"
-                    :disabled="! Route::has('admin.kalender.index')"
-                >
-                    Kalender Jadwal
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('admin.kalender.index')"
+					icon="calendar"
+					:active="request()->routeIs('admin.kalender.*')"
+				>
+					Kalender Jadwal
+				</x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
                     :href="Route::has('admin.laporan.index') ? route('admin.laporan.index') : null"
@@ -183,13 +183,13 @@
             </x-dashboard.nav-group>
 
             <x-dashboard.nav-group title="Lainnya">
-                <x-dashboard.nav-item
-                    :href="Route::has('cs.kalender.index') ? route('cs.kalender.index') : null"
-                    icon="calendar"
-                    :disabled="! Route::has('cs.kalender.index')"
-                >
-                    Kalender Jadwal
-                </x-dashboard.nav-item>
+				<x-dashboard.nav-item
+					:href="route('cs.kalender.index')"
+					icon="calendar"
+					:active="request()->routeIs('cs.kalender.*')"
+				>
+					Kalender Jadwal
+				</x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
                     :href="Route::has('cs.riwayat.index') ? route('cs.riwayat.index') : null"

@@ -2,10 +2,13 @@
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\JadwalController;
+use App\Http\Controllers\Admin\KalenderController as AdminKalenderController;
 use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Admin\PengaturanSistemController;
 use App\Http\Controllers\Admin\PengumumanController;
+use App\Http\Controllers\Admin\ReservasiController as AdminReservasiController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboardController;
+use App\Http\Controllers\Cs\KalenderController as CsKalenderController;
 use App\Http\Controllers\Cs\ReservasiController as CsReservasiController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ReservasiController;
@@ -37,6 +40,11 @@ Route::prefix('reservasi')->name('reservasi.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('reservasi/export', [AdminReservasiController::class, 'export'])->name('reservasi.export');
+    Route::get('reservasi', [AdminReservasiController::class, 'index'])->name('reservasi.index');
+
+    Route::get('kalender-jadwal', [AdminKalenderController::class, 'index'])->name('kalender.index');
+
     Route::resource('layanan', LayananController::class);
     Route::patch('layanan/{layanan}/toggle-status', [LayananController::class, 'toggleStatus'])
         ->name('layanan.toggle-status');
@@ -62,6 +70,8 @@ Route::prefix('cs')->name('cs.')->group(function () {
     Route::get('reservasi/{reservasi}', [CsReservasiController::class, 'show'])->name('reservasi.show');
     Route::put('reservasi/{reservasi}/status', [CsReservasiController::class, 'updateStatus'])->name('reservasi.status.update');
     Route::post('reservasi/{reservasi}/catatan', [CsReservasiController::class, 'storeCatatan'])->name('reservasi.catatan.store');
+
+    Route::get('kalender-jadwal', [CsKalenderController::class, 'index'])->name('kalender.index');
 });
 
 Route::prefix('system')->name('system.')->group(function () {
