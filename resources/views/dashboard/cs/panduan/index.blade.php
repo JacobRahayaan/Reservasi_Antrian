@@ -80,7 +80,7 @@
             </ul>
             <p>
                 Sistem akan otomatis menonaktifkan pilihan status yang tidak valid dari status saat ini, sehingga
-                Anda tidak perlu menghafal urutan ini — cukup pilih dari opsi yang tersedia.
+                Anda tidak perlu menghafal urutan ini  cukup pilih dari opsi yang tersedia.
             </p>
         </x-panduan.section>
 
@@ -128,7 +128,7 @@
             <p class="mx-auto mt-1.5 max-w-sm text-sm text-pln-slate-300">
                 Hubungi tim IT Support internal atau supervisor Anda jika mengalami kendala teknis di luar panduan ini.
             </p>
-            
+            <a
                 href="tel:123"
                 class="mt-4 inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-pln-navy-900 transition hover:bg-pln-slate-100"
             >
