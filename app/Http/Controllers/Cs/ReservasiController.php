@@ -9,8 +9,8 @@ use App\Http\Requests\UpdateStatusReservasiRequest;
 use App\Models\Layanan;
 use App\Models\Petugas;
 use App\Models\Reservasi;
+use App\Services\ReservasiQueryService;
 use App\Services\ReservasiStatusService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,8 +21,10 @@ class ReservasiController extends Controller
     private const STATUS_AKTIF = ['menunggu_review', 'perlu_datang'];
     private const STATUS_RIWAYAT = ['selesai_online', 'selesai', 'dibatalkan'];
 
-    public function __construct(private readonly ReservasiStatusService $statusService)
-    {
+    public function __construct(
+        private readonly ReservasiStatusService $statusService,
+        private readonly ReservasiQueryService $queryService,
+    ) {
     }
 
     /**
@@ -35,20 +37,13 @@ class ReservasiController extends Controller
         $tab = $request->query('tab') === 'riwayat' ? 'riwayat' : 'aktif';
         $statusGrup = $tab === 'riwayat' ? self::STATUS_RIWAYAT : self::STATUS_AKTIF;
 
-        $filters = [
-            'cari' => trim((string) $request->query('cari', '')),
-            'layanan_id' => $request->query('layanan_id', ''),
-            'status' => $request->query('status', ''),
-            'tanggal_mulai' => $request->query('tanggal_mulai', ''),
-            'tanggal_akhir' => $request->query('tanggal_akhir', ''),
-            'urutan' => $request->query('urutan') === 'terlama' ? 'terlama' : 'terbaru',
-        ];
+        $filters = $this->ambilFilter($request);
 
-        $reservasis = $this->queryDasar($statusGrup, $filters)
+        $reservasis = $this->queryService->queryDasar($filters, $statusGrup)
             ->paginate(10)
             ->withQueryString();
 
-        $statistik = $this->hitungStatistik($statusGrup, $filters);
+        $statistik = $this->queryService->hitungStatistik($statusGrup, $filters, $statusGrup);
 
         $layanans = Layanan::query()->orderBy('nama_layanan')->get(['id', 'nama_layanan']);
 
@@ -67,10 +62,6 @@ class ReservasiController extends Controller
 
     /**
      * Tampilkan halaman Detail Reservasi Customer Service.
-     *
-     * Query dioptimalkan: setiap relasi hanya memuat kolom yang benar-benar
-     * ditampilkan, seluruh riwayat status & catatan diambil terurut
-     * kronologis dengan petugas ter-eager-load (mencegah N+1).
      */
     public function show(Reservasi $reservasi): View
     {
@@ -129,16 +120,9 @@ class ReservasiController extends Controller
         $tab = $request->query('tab') === 'riwayat' ? 'riwayat' : 'aktif';
         $statusGrup = $tab === 'riwayat' ? self::STATUS_RIWAYAT : self::STATUS_AKTIF;
 
-        $filters = [
-            'cari' => trim((string) $request->query('cari', '')),
-            'layanan_id' => $request->query('layanan_id', ''),
-            'status' => $request->query('status', ''),
-            'tanggal_mulai' => $request->query('tanggal_mulai', ''),
-            'tanggal_akhir' => $request->query('tanggal_akhir', ''),
-            'urutan' => $request->query('urutan') === 'terlama' ? 'terlama' : 'terbaru',
-        ];
+        $filters = $this->ambilFilter($request);
 
-        $reservasis = $this->queryDasar($statusGrup, $filters)->get();
+        $reservasis = $this->queryService->queryDasar($filters, $statusGrup)->get();
 
         $namaFile = 'reservasi-' . $tab . '-' . now()->format('Y-m-d-His') . '.csv';
 
@@ -166,82 +150,17 @@ class ReservasiController extends Controller
     }
 
     /**
-     * Query dasar dengan eager loading, search, filter, dan sorting.
-     * Dipakai bersama oleh index() dan export() agar hasilnya konsisten.
-     *
-     * @param  array<int, string>  $statusGrup
-     * @param  array<string, string>  $filters
+     * @return array<string, string>
      */
-    private function queryDasar(array $statusGrup, array $filters): Builder
+    private function ambilFilter(Request $request): array
     {
-        return Reservasi::query()
-            ->with([
-                'layanan:id,nama_layanan,kode_layanan',
-                'jadwal:id,tanggal,jam_mulai,jam_selesai',
-                'statusHistories' => fn ($query) => $query->latest('changed_at')->limit(1)->with('petugas:id,nama_petugas'),
-            ])
-            ->whereIn('status', $statusGrup)
-            ->when($filters['cari'] !== '', function (Builder $query) use ($filters) {
-                $cari = $filters['cari'];
-                $query->where(function (Builder $q) use ($cari) {
-                    $q->where('nama', 'like', "%{$cari}%")
-                        ->orWhere('nomor_antrean', 'like', "%{$cari}%")
-                        ->orWhere('kode_reservasi', 'like', "%{$cari}%");
-                });
-            })
-            ->when($filters['layanan_id'] !== '', fn (Builder $query) => $query->where('layanan_id', $filters['layanan_id']))
-            ->when($filters['status'] !== '' && in_array($filters['status'], $statusGrup, true), fn (Builder $query) => $query->where('status', $filters['status']))
-            ->when($filters['tanggal_mulai'] !== '', function (Builder $query) use ($filters) {
-                $query->whereHas('jadwal', fn (Builder $q) => $q->whereDate('tanggal', '>=', $filters['tanggal_mulai']));
-            })
-            ->when($filters['tanggal_akhir'] !== '', function (Builder $query) use ($filters) {
-                $query->whereHas('jadwal', fn (Builder $q) => $q->whereDate('tanggal', '<=', $filters['tanggal_akhir']));
-            })
-            ->orderBy('created_at', $filters['urutan'] === 'terlama' ? 'asc' : 'desc');
-    }
-
-    /**
-     * Hitung ringkasan jumlah reservasi per status untuk kartu statistik,
-     * mengikuti filter (kecuali filter status itu sendiri) yang sedang aktif,
-     * dalam satu query agregasi.
-     *
-     * @param  array<int, string>  $statusGrup
-     * @param  array<string, string>  $filters
-     * @return array<string, int>
-     */
-    private function hitungStatistik(array $statusGrup, array $filters): array
-    {
-        $query = Reservasi::query()
-            ->whereIn('status', $statusGrup)
-            ->when($filters['cari'] !== '', function (Builder $q) use ($filters) {
-                $cari = $filters['cari'];
-                $q->where(function (Builder $qq) use ($cari) {
-                    $qq->where('nama', 'like', "%{$cari}%")
-                        ->orWhere('nomor_antrean', 'like', "%{$cari}%")
-                        ->orWhere('kode_reservasi', 'like', "%{$cari}%");
-                });
-            })
-            ->when($filters['layanan_id'] !== '', fn (Builder $q) => $q->where('layanan_id', $filters['layanan_id']))
-            ->when($filters['tanggal_mulai'] !== '', function (Builder $q) use ($filters) {
-                $q->whereHas('jadwal', fn (Builder $qq) => $qq->whereDate('tanggal', '>=', $filters['tanggal_mulai']));
-            })
-            ->when($filters['tanggal_akhir'] !== '', function (Builder $q) use ($filters) {
-                $q->whereHas('jadwal', fn (Builder $qq) => $qq->whereDate('tanggal', '<=', $filters['tanggal_akhir']));
-            });
-
-        $counts = (clone $query)
-            ->selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
-
-        $hasil = [];
-
-        foreach ($statusGrup as $status) {
-            $hasil[$status] = (int) ($counts[$status] ?? 0);
-        }
-
-        $hasil['total'] = (int) $counts->sum();
-
-        return $hasil;
+        return [
+            'cari' => trim((string) $request->query('cari', '')),
+            'layanan_id' => $request->query('layanan_id', ''),
+            'status' => $request->query('status', ''),
+            'tanggal_mulai' => $request->query('tanggal_mulai', ''),
+            'tanggal_akhir' => $request->query('tanggal_akhir', ''),
+            'urutan' => $request->query('urutan') === 'terlama' ? 'terlama' : 'terbaru',
+        ];
     }
 }
