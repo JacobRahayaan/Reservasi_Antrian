@@ -10,6 +10,7 @@ use App\Models\NomorAntreanCounter;
 use App\Models\Reservasi;
 use App\Models\ReservasiNote;
 use App\Models\StatusHistory;
+use App\Services\SinkronisasiCounterMesinService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -221,25 +222,36 @@ class ReservasiService
      * mis. A001, B002. Urutan direset setiap hari per jenis layanan.
      */
     private function generateNomorAntrean(Layanan $layanan, string $tanggal): string
-    {
-        $counter = NomorAntreanCounter::query()
-            ->where('layanan_id', $layanan->id)
-            ->where('tanggal', $tanggal)
-            ->lockForUpdate()
-            ->first();
+	{
+		$counter = NomorAntreanCounter::query()
+			->where('layanan_id', $layanan->id)
+			->where('tanggal', $tanggal)
+			->lockForUpdate()
+			->first();
 
-        if (! $counter) {
-            $counter = NomorAntreanCounter::create([
-                'layanan_id' => $layanan->id,
-                'tanggal' => $tanggal,
-                'urutan_terakhir' => 0,
-            ]);
-        }
+		if (! $counter) {
+			$counter = NomorAntreanCounter::create([
+				'layanan_id' => $layanan->id,
+				'tanggal' => $tanggal,
+				'urutan_terakhir' => 0,
+			]);
+		}
 
-        $counter->increment('urutan_terakhir');
+		// Coba sinkron dari mesin fisik dulu — kalau mesin menunjukkan angka
+		// lebih besar dari counter internal kita (mis. sudah ada walk-in yang
+		// cetak tiket duluan tanpa sepengetahuan sistem), pakai angka mesin
+		// sebagai basis, supaya nomor online tidak pernah "tabrakan mundur".
+		$totalDariMesin = app(SinkronisasiCounterMesinService::class)
+			->ambilTotalAntreanSaatIni($layanan->kode_layanan);
 
-        return $layanan->kode_layanan . str_pad((string) $counter->urutan_terakhir, 3, '0', STR_PAD_LEFT);
-    }
+		if ($totalDariMesin !== null && $totalDariMesin > $counter->urutan_terakhir) {
+			$counter->update(['urutan_terakhir' => $totalDariMesin]);
+		}
+
+		$counter->increment('urutan_terakhir');
+
+		return $layanan->kode_layanan . str_pad((string) $counter->urutan_terakhir, 3, '0', STR_PAD_LEFT);
+	}
 
     private function simpanDokumen(Reservasi $reservasi, UploadedFile $file): void
     {

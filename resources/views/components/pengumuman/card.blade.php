@@ -33,7 +33,7 @@
 
     <div class="mt-3 flex items-center justify-between">
         <span class="text-xs text-pln-slate-400">
-            {{ $pengumuman->tanggal_mulai->translatedFormat('d M Y') }} —
+            {{ $pengumuman->tanggal_mulai->translatedFormat('d M Y') }} -
             {{ $pengumuman->tanggal_selesai?->translatedFormat('d M Y') ?? 'Tanpa batas' }}
         </span>
         <button type="button" data-modal-target="modal-toggle-pengumuman-mobile-{{ $pengumuman->id }}">

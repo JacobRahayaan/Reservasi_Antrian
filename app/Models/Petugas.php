@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Petugas extends Model
+class Petugas extends Authenticatable
 {
     use HasFactory;
+    use Notifiable;
 
     protected $table = 'petugas';
 
@@ -16,12 +19,19 @@ class Petugas extends Model
         'nama_petugas',
         'email',
         'no_hp',
+        'password',
         'is_active',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
     protected function casts(): array
     {
         return [
+            'password' => 'hashed',
             'is_active' => 'boolean',
         ];
     }
@@ -37,23 +47,39 @@ class Petugas extends Model
     }
 
     /**
-     * Simulasi "petugas yang sedang login", karena fitur autentikasi belum
-     * dibangun. Mengembalikan petugas aktif pertama di database. Ganti
-     * dengan `auth()->user()->petugas` begitu modul Login dibangun.
+     * Nama tampilan yang seragam lintas guard (admin & petugas). Tabel
+     * petugas memakai kolom `nama_petugas` (bukan `nama`), sehingga
+     * accessor ini menjembatani perbedaan nama kolom tanpa mengubah skema
+     * yang sudah ada sejak Sprint 6.
      */
-    public static function aktifSaatIni(): self
+    protected function namaTampilan(): Attribute
     {
-        return static::query()
-            ->where('is_active', true)
-            ->oldest('id')
-            ->firstOrFail();
+        return Attribute::make(
+            get: fn () => $this->nama_petugas,
+        );
+    }
+
+    /**
+     * Label peran yang seragam lintas guard, dipakai View Composer untuk
+     * mengisi @yield('user-role') secara otomatis.
+     */
+    public function labelPeran(): string
+    {
+        return 'Customer Service';
+    }
+
+    /**
+     * Inisial 1-2 huruf untuk avatar bulat di topbar, seragam lintas guard.
+     */
+    public function inisial(): string
+    {
+        return mb_substr($this->nama_petugas, 0, 2);
     }
 
     /**
      * Apakah petugas ini pernah bertindak di sistem (menulis catatan atau
      * mengubah status reservasi). Dipakai untuk menentukan apakah petugas
-     * boleh dihapus permanen atau harus dinonaktifkan saja — mencegah
-     * kehilangan jejak audit pada riwayat status/catatan yang sudah tercatat.
+     * boleh dihapus permanen atau harus dinonaktifkan saja.
      */
     public function pernahBertindak(): bool
     {

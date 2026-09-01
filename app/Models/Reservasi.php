@@ -24,12 +24,17 @@ class Reservasi extends Model
         'email',
         'keluhan',
         'status',
+		'status_sinkron_fisik',
+		'disinkronkan_pada',
+		'disinkronkan_oleh_petugas_id',
     ];
 
     protected function casts(): array
     {
         return [
             'status' => ReservasiStatus::class,
+            'status_sinkron_fisik' => \App\Enums\StatusSinkronFisik::class,
+            'disinkronkan_pada' => 'datetime',
         ];
     }
 
@@ -71,4 +76,14 @@ class Reservasi extends Model
     {
         return 'kode_reservasi';
     }
+	
+	public function panggilanAntreans(): HasMany
+	{
+		return $this->hasMany(PanggilanAntrean::class);
+	}
+	
+	public function disinkronkanOleh(): BelongsTo
+	{
+		return $this->belongsTo(Petugas::class, 'disinkronkan_oleh_petugas_id');
+	}
 }

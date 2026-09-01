@@ -53,7 +53,17 @@
                 </div>
 
                 <div class="flex shrink-0 gap-3">
-                    <a
+					<form action="{{ route('cs.reservasi.panggil-ke-loket', $reservasi) }}" method="POST">
+						@csrf
+						<button
+							type="submit"
+							class="inline-flex items-center gap-2 rounded-lg bg-pln-amber-500 px-4 py-2.5 text-sm font-semibold text-pln-navy-950 transition hover:bg-pln-amber-400"
+						>
+							<x-icon name="megaphone" class="h-4 w-4" />
+							Panggil ke Loket
+						</button>
+					</form>                    
+					<a
                         href="{{ route('cs.reservasi.export', ['tab' => in_array($reservasi->status->value, ['menunggu_review', 'perlu_datang']) ? 'aktif' : 'riwayat']) }}"
                         class="inline-flex items-center gap-2 rounded-lg border border-pln-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-pln-navy-800 transition hover:bg-pln-slate-50"
                     >
@@ -72,6 +82,52 @@
 
             <div class="mt-6 border-t border-pln-slate-100 pt-6">
                 <x-cs-reservasi.status-progress :reservasi="$reservasi" />
+
+                @if ($reservasi->status_sinkron_fisik !== \App\Enums\StatusSinkronFisik::TidakPerlu)
+                    <div class="mt-5 flex flex-col gap-3 rounded-lg border border-pln-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-xs font-medium uppercase tracking-wider text-pln-slate-400">Sinkronisasi Mesin Fisik</p>
+                            <div class="mt-1 flex items-center gap-2">
+                                <x-badge :variant="$reservasi->status_sinkron_fisik->badgeVariant()">
+                                    {{ $reservasi->status_sinkron_fisik->label() }}
+                                </x-badge>
+                                @if ($reservasi->status_sinkron_fisik === \App\Enums\StatusSinkronFisik::SudahDisinkronkan && $reservasi->disinkronkan_pada)
+                                    <span class="text-xs text-pln-slate-400">
+                                        {{ $reservasi->disinkronkan_pada->translatedFormat('d M Y, H:i') }}
+                                        @if ($reservasi->disinkronkanOleh)
+                                            oleh {{ $reservasi->disinkronkanOleh->nama_petugas }}
+                                        @else
+                                            (terdeteksi otomatis)
+                                        @endif
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        @if ($reservasi->status_sinkron_fisik === \App\Enums\StatusSinkronFisik::BelumDisinkronkan)
+                            <div class="flex shrink-0 gap-2">
+                                <form action="{{ route('cs.reservasi.cek-sinkron-otomatis', $reservasi) }}" method="POST">
+                                    @csrf
+                                    <button
+                                        type="submit"
+                                        class="rounded-lg border border-pln-slate-300 px-3 py-2 text-xs font-semibold text-pln-slate-700 transition hover:bg-pln-slate-50"
+                                    >
+                                        Cek Otomatis ke Mesin
+                                    </button>
+                                </form>
+                                <form action="{{ route('cs.reservasi.tandai-sinkron-fisik', $reservasi) }}" method="POST">
+                                    @csrf
+                                    <button
+                                        type="submit"
+                                        class="rounded-lg bg-status-done px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                                    >
+                                        Tandai Sudah Dicetak
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
+                    </div>
+                @endif
             </div>
         </x-card>
 

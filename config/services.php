@@ -34,5 +34,13 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+	'jembatan_antrean' => [
+    'token' => env('hk5YBW0O8iw7q9ZoAS69YDkOwOoc1bZDgILBxbcG'),
+	],
+	'mesin_antrean' => [
+		'mode' => env('MODE_PANGGILAN_ANTREAN', 'jembatan'),
+		'url' => env('MESIN_ANTREAN_URL'),
+		'username' => env('MESIN_ANTREAN_USERNAME'),
+		'password' => env('MESIN_ANTREAN_PASSWORD'),
+	],
 ];

@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\PengumumanController;
 use App\Http\Controllers\Admin\PetugasController;
 use App\Http\Controllers\Admin\ProfilController as AdminProfilController;
 use App\Http\Controllers\Admin\ReservasiController as AdminReservasiController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Cs\DashboardController as CsDashboardController;
 use App\Http\Controllers\Cs\KalenderController as CsKalenderController;
 use App\Http\Controllers\Cs\PanduanController as CsPanduanController;
@@ -48,7 +49,27 @@ Route::prefix('reservasi')->name('reservasi.')->group(function () {
         ->name('dokumen.preview');
 });
 
-Route::prefix('admin')->name('admin.')->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Autentikasi (Admin & Customer Service)
+|--------------------------------------------------------------------------
+| Pelanggan tidak memiliki akun (BR-10) — grup ini hanya untuk staf
+| internal. Satu halaman login, dua guard (admin, petugas), dipilih
+| lewat dropdown "Login Sebagai".
+*/
+Route::middleware('guest:admin,petugas')->group(function () {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('login.attempt');
+    Route::get('/lupa-password', [LoginController::class, 'lupaPassword'])->name('password.lupa');
+});
+
+Route::post('/logout', [LoginController::class, 'destroy'])
+    ->middleware('auth:admin,petugas')
+    ->name('logout');
+
+Route::prefix('admin')->name('admin.')->middleware('auth:admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('reservasi/export', [AdminReservasiController::class, 'export'])->name('reservasi.export');
@@ -64,6 +85,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         ->name('layanan.toggle-status');
 
     Route::get('jadwal/export', [JadwalController::class, 'export'])->name('jadwal.export');
+    Route::post('jadwal/berulang', [JadwalController::class, 'storeBerulang'])->name('jadwal.store-berulang');
     Route::resource('jadwal', JadwalController::class);
     Route::patch('jadwal/{jadwal}/toggle-status', [JadwalController::class, 'toggleStatus'])
         ->name('jadwal.toggle-status');
@@ -82,14 +104,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('profil', [AdminProfilController::class, 'index'])->name('profil.index');
 });
 
-Route::prefix('cs')->name('cs.')->group(function () {
+Route::prefix('cs')->name('cs.')->middleware('auth:petugas')->group(function () {
     Route::get('/dashboard', [CsDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('reservasi/export', [CsReservasiController::class, 'export'])->name('reservasi.export');
+    Route::get('reservasi/belum-dicetak-fisik', [CsReservasiController::class, 'belumDicetakFisik'])->name('reservasi.belum-dicetak-fisik');
     Route::get('reservasi', [CsReservasiController::class, 'index'])->name('reservasi.index');
     Route::get('reservasi/{reservasi}', [CsReservasiController::class, 'show'])->name('reservasi.show');
     Route::put('reservasi/{reservasi}/status', [CsReservasiController::class, 'updateStatus'])->name('reservasi.status.update');
     Route::post('reservasi/{reservasi}/catatan', [CsReservasiController::class, 'storeCatatan'])->name('reservasi.catatan.store');
+	Route::post('reservasi/{reservasi}/panggil-ke-loket', [CsReservasiController::class, 'panggilKeLoket'])->name('reservasi.panggil-ke-loket');
+	Route::post('reservasi/{reservasi}/tandai-sinkron-fisik', [CsReservasiController::class, 'tandaiSinkronFisik'])
+		->name('reservasi.tandai-sinkron-fisik');
+	Route::post('reservasi/{reservasi}/cek-sinkron-otomatis', [CsReservasiController::class, 'cekSinkronOtomatis'])
+		->name('reservasi.cek-sinkron-otomatis');
+	Route::get('notifikasi/cek-reservasi-baru', [\App\Http\Controllers\Cs\NotifikasiController::class, 'cekReservasiBaru'])
+		->name('notifikasi.cek-reservasi-baru');
 
     Route::get('kalender-jadwal', [CsKalenderController::class, 'index'])->name('kalender.index');
 

@@ -6,6 +6,7 @@ use App\Enums\ReservasiStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Layanan;
 use App\Models\Reservasi;
+use App\Services\SinkronisasiFisikService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,6 +14,10 @@ use Illuminate\View\View;
 class DashboardController extends Controller
 {
     private const TAB_VALID = ['semua', 'menunggu_review', 'perlu_datang', 'selesai_online'];
+
+    public function __construct(private readonly SinkronisasiFisikService $sinkronisasiFisikService)
+    {
+    }
 
     /**
      * Tampilkan halaman ringkasan Dashboard Customer Service.
@@ -57,6 +62,9 @@ class DashboardController extends Controller
             ->where('status', ReservasiStatus::MenungguReview)
             ->count();
 
+        $daftarBelumSinkron = $this->sinkronisasiFisikService->daftarBelumSinkron();
+        $jumlahBelumSinkron = $this->sinkronisasiFisikService->hitungBelumSinkron();
+
         return view('dashboard.cs.index', [
             'tanggal' => $tanggal,
             'kartuStatistik' => $kartuStatistik,
@@ -67,6 +75,8 @@ class DashboardController extends Controller
             'tab' => $tab,
             'jumlahNotifikasi' => $jumlahNotifikasi,
             'statistikHariIni' => $statistikHariIni,
+            'daftarBelumSinkron' => $daftarBelumSinkron,
+            'jumlahBelumSinkron' => $jumlahBelumSinkron,
         ]);
     }
 

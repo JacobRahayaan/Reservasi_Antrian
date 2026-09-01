@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Petugas;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class UpdateProfilCsRequest extends FormRequest
@@ -18,7 +18,7 @@ class UpdateProfilCsRequest extends FormRequest
      */
     public function rules(): array
     {
-        $petugas = Petugas::aktifSaatIni();
+        $petugas = Auth::guard('petugas')->user();
 
         return [
             'nama_petugas' => ['required', 'string', 'min:3', 'max:100'],

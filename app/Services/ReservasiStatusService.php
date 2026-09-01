@@ -1,15 +1,13 @@
 <?php
-
 namespace App\Services;
-
 use App\Enums\ReservasiStatus;
+use App\Enums\StatusSinkronFisik;
 use App\Models\Petugas;
 use App\Models\Reservasi;
 use App\Models\ReservasiNote;
 use App\Models\StatusHistory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-
 class ReservasiStatusService
 {
     /**
@@ -22,16 +20,25 @@ class ReservasiStatusService
     {
         return DB::transaction(function () use ($reservasi, $statusBaru, $keterangan, $petugas) {
             $reservasiTerkunci = Reservasi::query()->lockForUpdate()->findOrFail($reservasi->id);
-
             $statusSebelum = $reservasiTerkunci->status;
-
             if (! $statusSebelum->bisaBertransisiKe($statusBaru)) {
                 throw ValidationException::withMessages([
                     'status' => "Status tidak dapat diubah dari \"{$statusSebelum->label()}\" ke \"{$statusBaru->label()}\".",
                 ]);
             }
 
-            $reservasiTerkunci->update(['status' => $statusBaru]);
+            $dataUpdate = ['status' => $statusBaru];
+
+            // Setiap kali reservasi ditandai "Perlu Datang", pelanggan akan
+            // datang fisik ke kantor dan butuh nomor antrean yang sesuai di
+            // mesin fisik. Tandai otomatis "belum disinkronkan" supaya muncul
+            // di widget notifikasi Dashboard CS sampai petugas mengonfirmasi
+            // tiket fisiknya sudah tersedia.
+            if ($statusBaru === ReservasiStatus::PerluDatang) {
+                $dataUpdate['status_sinkron_fisik'] = StatusSinkronFisik::BelumDisinkronkan;
+            }
+
+            $reservasiTerkunci->update($dataUpdate);
 
             StatusHistory::create([
                 'reservasi_id' => $reservasiTerkunci->id,
@@ -41,11 +48,9 @@ class ReservasiStatusService
                 'keterangan' => $keterangan,
                 'changed_at' => now(),
             ]);
-
             return $reservasiTerkunci->fresh();
         });
     }
-
     /**
      * Tambahkan catatan Customer Service baru pada sebuah reservasi.
      * Tidak mengubah status maupun kuota — murni operasi tulis tunggal,

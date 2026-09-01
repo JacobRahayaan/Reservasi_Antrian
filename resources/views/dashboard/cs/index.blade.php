@@ -11,7 +11,11 @@
 
     <div class="space-y-6">
 
-        <x-dashboard.welcome-banner nama="CS. Amanda" role="cs" />
+        <x-dashboard.welcome-banner :nama="auth('petugas')->user()->nama_tampilan" role="cs" />
+		<x-cs-reservasi.sinkron-fisik-widget
+			:daftar-belum-sinkron="$daftarBelumSinkron"
+			:jumlah-belum-sinkron="$jumlahBelumSinkron"
+		/>
 
         {{-- Kartu Statistik --}}
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">

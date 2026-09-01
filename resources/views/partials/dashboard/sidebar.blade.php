@@ -8,6 +8,11 @@
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
+
+        $jumlahBelumSinkronFisik = \App\Models\Reservasi::query()
+            ->where('status_sinkron_fisik', \App\Enums\StatusSinkronFisik::BelumDisinkronkan)
+            ->where('status', \App\Enums\ReservasiStatus::PerluDatang)
+            ->count();
     }
 @endphp
 
@@ -156,6 +161,15 @@
                 >
                     Perlu Datang
                 </x-dashboard.nav-item>
+				
+				<x-dashboard.nav-item
+					:href="route('cs.reservasi.belum-dicetak-fisik')"
+					icon="exclamation-triangle"
+					:active="request()->routeIs('cs.reservasi.belum-dicetak-fisik')"
+					:badge="$jumlahBelumSinkronFisik ?? 0"
+				>
+					Belum Dicetak Fisik
+				</x-dashboard.nav-item>
 
                 <x-dashboard.nav-item
                     :href="route('cs.reservasi.index', ['tab' => 'riwayat', 'status' => 'selesai_online'])"

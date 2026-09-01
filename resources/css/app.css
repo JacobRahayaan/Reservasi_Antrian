@@ -1,3 +1,12 @@
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/sora/500.css';
+@import '@fontsource/sora/600.css';
+@import '@fontsource/sora/700.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/600.css';
 @import "tailwindcss";
 
 @theme {
@@ -33,6 +42,17 @@
     --color-status-online: #0e8f7a;
     --color-status-done: #1f8b3f;
     --color-status-cancel: #b23b3b;
+
+	@keyframes toast-masuk {
+		from {
+			opacity: 0;
+			transform: translateX(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
 }
 
 @layer base {

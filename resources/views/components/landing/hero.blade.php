@@ -15,7 +15,7 @@
             </p>
 
             <div class="mt-7 flex flex-wrap items-center gap-4">
-                <x-button href="#cara-reservasi" variant="primary" size="lg">
+                <x-button href="{{ route('reservasi.create') }}" variant="primary" size="lg">
                     <x-icon name="document-text" class="h-5 w-5" />
                     Buat Reservasi Sekarang
                 </x-button>

@@ -40,6 +40,7 @@
         'plus' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m-8-8h16" />',
         'trash' => '<path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13" /><path stroke-linecap="round" d="M10 11v6M14 11v6" />',
         'eye' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7S2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="3" />',
+        'eye-slash' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" /><path stroke-linecap="round" stroke-linejoin="round" d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6 0 9.5 7 9.5 7a17.3 17.3 0 0 1-3.2 4.1M6.5 6.7C4 8.4 2.5 12 2.5 12s3.5 7 9.5 7a9.7 9.7 0 0 0 3.4-.6" /><path stroke-linecap="round" stroke-linejoin="round" d="M9.9 10a2.5 2.5 0 0 0 3.5 3.5" />',
         'pause-circle' => '<circle cx="12" cy="12" r="9" /><path stroke-linecap="round" d="M10 9v6M14 9v6" />',
         'chart-pie' => '<path stroke-linecap="round" stroke-linejoin="round" d="M11 3.5A8.5 8.5 0 1 0 20.5 13H11V3.5Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M14.5 3.6A8.5 8.5 0 0 1 20.4 9.5H14.5V3.6Z" />',
         'arrows-up-down' => '<path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16m0 0-3-3m3 3 3-3M17 20V4m0 0 3 3m-3-3-3 3" />',
@@ -48,6 +49,8 @@
         'dots-vertical' => '<circle cx="12" cy="6" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="12" cy="18" r="1.2" />',
         'filter' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4 5h16M7 12h10M11 19h2" />',
         'paper-airplane' => '<path stroke-linecap="round" stroke-linejoin="round" d="m3 20 18-8L3 4l0 6.5 12 1.5-12 1.5Z" />',
+        'lock' => '<rect x="5" y="11" width="14" height="9" rx="2" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 11V8a4 4 0 0 1 8 0v3" />',
+        'logout' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3" /><path stroke-linecap="round" stroke-linejoin="round" d="M16 17l5-5-5-5M21 12H9" />',
     ];
 
     $path = $icons[$name] ?? '';

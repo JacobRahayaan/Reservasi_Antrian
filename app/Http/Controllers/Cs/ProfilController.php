@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateProfilCsRequest;
 use App\Models\Petugas;
 use App\Services\PetugasService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class ProfilController extends Controller
@@ -17,12 +18,13 @@ class ProfilController extends Controller
 
     /**
      * Tampilkan halaman Profil Saya untuk Customer Service, didukung data
-     * nyata dari Petugas::aktifSaatIni() — berbeda dari Profil Admin yang
-     * read-only, halaman ini benar-benar dapat diubah dan tersimpan.
+     * petugas yang sesungguhnya sedang login (guard `petugas`) — tidak lagi
+     * memakai simulasi Petugas::aktifSaatIni().
      */
     public function index(): View
     {
-        $petugas = Petugas::aktifSaatIni();
+        /** @var Petugas $petugas */
+        $petugas = Auth::guard('petugas')->user();
 
         return view('dashboard.cs.profil.index', compact('petugas'));
     }
@@ -33,7 +35,8 @@ class ProfilController extends Controller
      */
     public function update(UpdateProfilCsRequest $request): RedirectResponse
     {
-        $petugas = Petugas::aktifSaatIni();
+        /** @var Petugas $petugas */
+        $petugas = Auth::guard('petugas')->user();
 
         $this->petugasService->perbarui($petugas, $request->validated());
 

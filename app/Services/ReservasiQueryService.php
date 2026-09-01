@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\StatusSinkronFisik;
 use App\Models\Reservasi;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -13,10 +14,14 @@ class ReservasiQueryService
      * pembatasan status) dan Cs\ReservasiController (dibatasi statusGrup
      * sesuai tab Aktif/Riwayat) — satu sumber logika, menghindari duplikasi.
      *
+     * Parameter $statusSinkronFisik bersifat opsional — dipakai oleh
+     * halaman "Belum Dicetak Fisik" untuk menyaring reservasi yang
+     * nomor antreannya belum tersinkron ke mesin antrean fisik.
+     *
      * @param  array<string, string>  $filters
      * @param  array<int, string>|null  $statusGrup
      */
-    public function queryDasar(array $filters, ?array $statusGrup = null): Builder
+    public function queryDasar(array $filters, ?array $statusGrup = null, ?StatusSinkronFisik $statusSinkronFisik = null): Builder
     {
         return Reservasi::query()
             ->with([
@@ -25,6 +30,7 @@ class ReservasiQueryService
                 'statusHistories' => fn ($query) => $query->latest('changed_at')->limit(1)->with('petugas:id,nama_petugas'),
             ])
             ->when($statusGrup !== null, fn (Builder $query) => $query->whereIn('status', $statusGrup))
+            ->when($statusSinkronFisik !== null, fn (Builder $query) => $query->where('status_sinkron_fisik', $statusSinkronFisik))
             ->when($filters['cari'] !== '', function (Builder $query) use ($filters) {
                 $cari = $filters['cari'];
                 $query->where(function (Builder $q) use ($cari) {

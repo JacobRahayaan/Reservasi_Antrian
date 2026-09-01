@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Beranda') — SIRA-PLN</title>
+    <title>@yield('title', 'Beranda') </title>
     <meta name="description" content="@yield('meta_description', 'Jadwalkan kedatangan Anda ke kantor PLN, sampaikan keluhan lebih awal, dan dapatkan nomor antrean tanpa perlu antre di tempat.')">
     <link rel="canonical" href="{{ url()->current() }}">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="SIRA-PLN">
-    <meta property="og:title" content="@yield('title', 'Beranda') — SIRA-PLN">
+    <meta property="og:title" content="@yield('title', 'Beranda')">
     <meta property="og:description" content="@yield('meta_description', 'Jadwalkan kedatangan Anda ke kantor PLN, sampaikan keluhan lebih awal, dan dapatkan nomor antrean tanpa perlu antre di tempat.')">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta name="twitter:card" content="summary_large_image">

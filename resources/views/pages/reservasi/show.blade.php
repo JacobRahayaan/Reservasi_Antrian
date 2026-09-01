@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Detail Reservasi — ' . $reservasi->nomor_antrean)
+@section('title', 'Detail Reservasi ' . $reservasi->nomor_antrean)
 @section('meta_description', 'Detail reservasi dan status layanan pelanggan PLN Anda.')
 
 @section('content')

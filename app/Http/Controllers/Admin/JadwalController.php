@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateJadwalRequest;
 use App\Models\Jadwal;
 use App\Models\Layanan;
 use App\Services\JadwalService;
+use App\Http\Requests\StoreJadwalBerulangRequest;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -104,6 +105,26 @@ class JadwalController extends Controller
         return redirect()
             ->route('admin.jadwal.index')
             ->with('success', "Jadwal untuk {$jadwal->layanan->nama_layanan} pada {$jadwal->tanggal->translatedFormat('d F Y')} berhasil ditambahkan.");
+    }
+
+    /**
+     * Simpan banyak jadwal sekaligus (generate otomatis) dari rentang
+     * tanggal, hari tertentu, dan jam operasional yang dipecah per
+     * interval. Alternatif dari store() untuk kasus jadwal berulang
+     * (mis. Senin-Jumat, 08:00-16:00, per 1 jam).
+     */
+    public function storeBerulang(StoreJadwalBerulangRequest $request): RedirectResponse
+    {
+        $hasil = $this->jadwalService->buatBerulang($request->validated());
+
+        $pesan = "{$hasil['dibuat']} jadwal berhasil dibuat.";
+        if ($hasil['dilewati'] > 0) {
+            $pesan .= " {$hasil['dilewati']} slot dilewati karena sudah ada jadwal yang sama.";
+        }
+
+        return redirect()
+            ->route('admin.jadwal.index')
+            ->with('success', $pesan);
     }
 
     /**
